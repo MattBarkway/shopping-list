@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut manager = ShoppingListManager::new(Box::new(connector));
 
-    manager.begin();
+    manager.begin().await?;
 
     Ok(())
 }
