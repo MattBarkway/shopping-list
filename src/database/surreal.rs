@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use std::error::Error;
-use surrealdb::engine::any::Any;
+
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;

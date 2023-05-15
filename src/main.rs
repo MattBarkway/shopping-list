@@ -2,8 +2,8 @@ mod database;
 mod endpoints;
 
 use crate::database::interface::{ConnectionManager, ShoppingListManager};
-use crate::database::surreal::{AsyncConnector, SurrealConnector};
-use actix_web::{App, HttpServer};
+use crate::database::surreal::{SurrealConnector};
+
 use std::error::Error;
 use tokio;
 
