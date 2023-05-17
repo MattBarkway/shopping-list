@@ -58,3 +58,17 @@ impl AsyncConnector for SurrealConnector {
         Ok(())
     }
 }
+
+use std::sync::Arc;
+use surrealdb::dbs::Session;
+use surrealdb::kvs::Datastore;
+use surrealdb::sql::Value;
+
+pub trait Creatable: Into<Value> {}
+pub trait Patchable: Into<Value> {}
+
+#[derive(Clone)]
+pub struct SurrealDBRepo {
+    pub ds: Arc<Datastore>,
+    pub ses: Session
+}

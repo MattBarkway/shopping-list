@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // })
     // .bind(("127.0.0.1", 8080))?
     // .run()
-    // .await
+    // .await?;
     let connector = SurrealConnector::new(
         "shopping",
         "shopping-list",
