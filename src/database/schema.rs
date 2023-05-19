@@ -2,13 +2,14 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
 #[derive(Debug, Serialize)]
-pub struct Item {
+pub struct ListItem {
     pub name: String,
+    pub quantity: usize,
 }
 
 #[derive(Debug, Serialize)]
 pub struct ItemSet {
-    pub items: Vec<Item>,
+    pub items: Vec<ListItem>,
 }
 
 #[derive(Debug, Serialize)]
