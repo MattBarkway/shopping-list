@@ -70,5 +70,5 @@ pub trait Patchable: Into<Value> {}
 #[derive(Clone)]
 pub struct SurrealDBRepo {
     pub ds: Arc<Datastore>,
-    pub ses: Session
+    pub ses: Session,
 }

@@ -26,6 +26,7 @@ pub struct Group {
 
 #[derive(Debug, Serialize)]
 pub struct Basket {
+    pub name: String,
     pub items: ItemSet,
     pub owner: User,
     pub contributors: Group,
