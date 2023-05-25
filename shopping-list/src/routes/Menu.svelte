@@ -11,7 +11,7 @@
 
 {#if open}
     <div>
-        {#each ['Home', 'Example', 'About', 'Contact'] as link, i}
+        {#each ['Login 🧍', 'About ❓'] as link, i}
             <p
                     transition:fly={{ y: -15, delay: 50 * i }}
                     on:introstart="{() => {status1 = false; ready = false;}}"
@@ -43,9 +43,8 @@
         text-align: center;
         font-size: 1.5em;
         letter-spacing: 0.15em;
-        padding: 1em;
-        padding-top: 0;
-        color: #eef;
+        padding: 0 1em 1em;
+        color: #eeeeff;
     }
 
     p {
@@ -56,5 +55,7 @@
 
     p:hover {
         text-decoration: underline;
+        opacity: 0.7;
+        transition: 0.3s;
     }
 </style>
