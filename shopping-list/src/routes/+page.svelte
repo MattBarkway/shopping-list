@@ -1,8 +1,5 @@
 <script>
-	import ShopplingList from "./ShoppingList.svelte";
-    import Menu from './Menu.svelte';
-
-	let open;
+	import ShoppingList from "./ShoppingList.svelte";
 </script>
 
 <svelte:head>
@@ -11,7 +8,7 @@
 </svelte:head>
 
 <section>
-	<ShopplingList />
+	<ShoppingList />
 </section>
 
 <style>

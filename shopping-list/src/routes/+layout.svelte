@@ -3,17 +3,19 @@
     import github from '$lib/images/github.svg';
     import {Hamburger} from "svelte-hamburgers";
     import Menu from "./Menu.svelte";
+    import { fly } from 'svelte/transition';
 
     let open;
+    let ready;
 </script>
 
 <Hamburger bind:open color="white" class="nav"/>
-<Menu bind:open class="nav" style="position: absolute; z-index: 1000;"/>
+<Menu bind:open bind:ready class="nav" style="position: absolute; z-index: 1000;"/>
 
-{#if !open}
-    <div class="app">
+    <div class="app" >
+{#if !open && ready}
+    <div class="fill" transition:fly={{ y: 195 }}>
         <main>
-            hello
             <slot/>
         </main>
 
@@ -26,8 +28,16 @@
         </footer>
     </div>
 {/if}
+    </div>
 
 <style>
+    .fill {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
     .nav {
         position: absolute;
         z-index: 100;
