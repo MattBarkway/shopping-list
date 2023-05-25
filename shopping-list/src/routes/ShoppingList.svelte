@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { spring } from 'svelte/motion';
 
-	let count = 0;
+	let count = 43;
 
 	const displayed_count = spring();
 	$: displayed_count.set(count);
@@ -13,33 +13,34 @@
 	}
 </script>
 
-<div class="counter">
-	<button on:click={() => (count -= 1)} aria-label="Decrease the counter by one">
-		<svg aria-hidden="true" viewBox="0 0 1 1">
-			<path d="M0,0.5 L1,0.5" />
-		</svg>
-	</button>
-
-	<div class="counter-viewport">
-		<div class="counter-digits" style="transform: translate(0, {100 * offset}%)">
-			<strong class="hidden" aria-hidden="true">{Math.floor($displayed_count + 1)}</strong>
-			<strong>{Math.floor($displayed_count)}</strong>
-		</div>
-	</div>
-
-	<button on:click={() => (count += 1)} aria-label="Increase the counter by one">
-		<svg aria-hidden="true" viewBox="0 0 1 1">
-			<path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
-		</svg>
-	</button>
+<div class="shopping-list">
+    This is a shopping list
+    <ul>
+        <li>HI</li>
+        <li>HI</li>
+        <li>HI</li>
+        <li>HI</li>
+        <li>HI</li>
+        <li>HI</li>
+    </ul>
 </div>
 
 <style>
-	.counter {
+    * {
+        font-family: Helvetica, sans-serif;
+    }
+
+	.shopping-list {
 		display: flex;
+        font-family: Helvetica, sans-serif;
 		border-top: 1px solid rgba(0, 0, 0, 0.1);
 		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 		margin: 1rem 0;
+        padding: 1rem;
+        background: #444444;
+        border-radius: 1em;
+        opacity: 0.5;
+        color: white;
 	}
 
 	.counter button {

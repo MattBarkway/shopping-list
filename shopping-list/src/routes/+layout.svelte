@@ -1,53 +1,78 @@
 <script>
-	import Header from './Header.svelte';
-	import './styles.css';
+    import './styles.css';
+    import github from '$lib/images/github.svg';
+    import {Hamburger} from "svelte-hamburgers";
+    import Menu from "./Menu.svelte";
+
+    let open;
 </script>
 
-<div class="app">
-	<Header />
+<Hamburger bind:open color="white" class="nav"/>
+<Menu bind:open class="nav" style="position: absolute; z-index: 1000;"/>
 
-	<main>
-		<slot />
-	</main>
+{#if !open}
+    <div class="app">
+        <main>
+            hello
+            <slot/>
+        </main>
 
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
-</div>
+        <footer>
+            <div class="corner">
+                <a href="https://github.com/mattbarkway">
+                    <img src={github} alt="GitHub"/>
+                </a>
+            </div>
+        </footer>
+    </div>
+{/if}
 
 <style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
+    .nav {
+        position: absolute;
+        z-index: 100;
+        background: #444444;
+        border-radius: 1em;
+    }
 
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
+    .app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        width: 100%;
+        max-width: 64rem;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
 
-	footer a {
-		font-weight: bold;
-	}
+    footer {
+        display: flex;
+        justify-content: space-between;
+    }
 
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
+    .corner {
+        width: 3em;
+        height: 3em;
+    }
+
+    .corner a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .corner img {
+        width: 2em;
+        height: 2em;
+        object-fit: contain;
+    }
 </style>
