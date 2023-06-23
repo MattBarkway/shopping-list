@@ -6,3 +6,5 @@ mydatabase.db
 .yarn
 .yarnrc.yml
 .venv
+*.pyc
+.env

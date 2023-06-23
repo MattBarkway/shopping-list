@@ -1,34 +1,24 @@
-# Use a base image with Rust and Cargo pre-installed
-FROM rust:latest as builder
+# Base image
+FROM python:3.10
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the Cargo.toml and Cargo.lock files
-COPY Cargo.toml Cargo.lock ./
+# Copy the poetry.lock and pyproject.toml files to the container
+COPY poetry.lock pyproject.toml ./
 
-# Build a dummy project to cache dependencies
-RUN mkdir src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release
+# Install poetry
+RUN pip install --no-cache-dir poetry
 
-# Copy the entire source code
+# Install project dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+# Copy the app source code to the container
 COPY . .
 
-# Build the Actix Web application
-RUN cargo build --release
+# Expose the port on which the FastAPI app will run
+EXPOSE 8000
 
-# Use a minimal base image for the final container
-FROM debian:buster-slim
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the built binary from the builder stage
-COPY --from=builder /app/target/release/your_app_name .
-
-# Expose the port your Actix Web application listens on
-EXPOSE 8080
-
-# Specify the command to run when the container starts
-CMD ["./your_app_name"]
+# Command to start the FastAPI app
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
