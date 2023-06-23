@@ -3,32 +3,32 @@
     import github from '$lib/images/github.svg';
     import {Hamburger} from "svelte-hamburgers";
     import Menu from "./Menu.svelte";
-    import { fly } from 'svelte/transition';
+    import {fly} from 'svelte/transition';
 
     let open;
     let ready;
 </script>
 
-<Hamburger bind:open color="white" class="nav"/>
+<Hamburger bind:open --color="#dddddd" class="nav"/>
 <Menu bind:open bind:ready class="nav" style="position: absolute; z-index: 1000;"/>
 
-    <div class="app" >
-{#if !open && ready}
-    <div class="fill" transition:fly={{ y: 195 }}>
-        <main>
-            <slot/>
-        </main>
+<div class="app">
+    {#if !open && ready}
+        <div class="fill" transition:fly={{ y: 195 }}>
+            <main>
+                <slot/>
+            </main>
 
-        <footer>
-            <div class="corner">
-                <a href="https://github.com/mattbarkway">
-                    <img src={github} alt="GitHub"/>
-                </a>
-            </div>
-        </footer>
-    </div>
-{/if}
-    </div>
+            <footer>
+                <div class="corner">
+                    <a href="https://github.com/mattbarkway">
+                        <img src={github} alt="GitHub"/>
+                    </a>
+                </div>
+            </footer>
+        </div>
+    {/if}
+</div>
 
 <style>
     .fill {
@@ -38,12 +38,14 @@
         flex-direction: column;
         min-height: 100vh;
     }
-    .nav {
-        position: absolute;
-        z-index: 100;
-        background: #444444;
-        border-radius: 1em;
-    }
+
+    /*.nav {*/
+    /*    position: absolute;*/
+    /*    z-index: 100;*/
+    /*    background: #444444;*/
+    /*    border-radius: 1em;*/
+    /*    color: white;*/
+    /*}*/
 
     .app {
         display: flex;

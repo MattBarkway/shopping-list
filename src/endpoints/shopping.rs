@@ -25,14 +25,16 @@ pub async fn add_shopping_list_item(
     )
 }
 
+
 #[post("/shopping/{id}")]
 pub async fn create_shopping_list(
     id: web::Path<usize>,
     to_create: web::Json<payloads::CreateShoppingList>,
 )  -> impl Responder {
-    let created: Record = DB
+    let result: surrealdb::Result<Record> = DB
         .create("shopping-list")
         .content(Basket {
+            name: str::to_string(""),
             items: ItemSet { items: vec![] },
             owner: User {
                 name: "".to_string(),
@@ -40,6 +42,10 @@ pub async fn create_shopping_list(
                 pw_hash: "".to_string(),
             },
             contributors: Group { users: vec![] },
-        })
-    .await?;
+        }).await;
+    if let Ok(_) = result {
+        "List created!"
+    } else {
+        "Whoops"
+    }
 }

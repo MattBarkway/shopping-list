@@ -13,7 +13,7 @@
     <div>
         {#each ['Login 🧍', 'About ❓'] as link, i}
             <p
-                    transition:fly={{ y: -15, delay: 50 * i }}
+                    transition:fly={{ y: -15, delay: 15 * i }}
                     on:introstart="{() => {status1 = false; ready = false;}}"
                     on:outroend="{() => {
                         status1 = true;
@@ -25,7 +25,7 @@
         {/each}
     </div>
 
-    <hr transition:scale={{ duration: 750, easing: quadOut, opacity: 1 }}
+    <hr transition:scale={{ duration: 200, easing: quadOut, opacity: 1 }}
         on:outroend="{() => {
             status2 = true;
             if (status1 && status2) { ready = true}
