@@ -2,5 +2,7 @@
 .idea/
 node_modules
 mydatabase.db
-deploy/.terraform/providers/registry.terraform.io/hashicorp/aws/3.76.1/darwin_arm64/terraform-provider-aws_v3.76.1_x5
-deploy/.terraform.lock.hcl
+.terraform
+.yarn
+.yarnrc.yml
+.venv
