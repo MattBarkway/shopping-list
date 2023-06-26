@@ -8,3 +8,5 @@ mydatabase.db
 .venv
 *.pyc
 .env
+.svelte-kit
+shopping-list/.DS_Store
