@@ -9,4 +9,4 @@ mydatabase.db
 *.pyc
 .env
 .svelte-kit
-shopping-list/.DS_Store
+.DS_Store

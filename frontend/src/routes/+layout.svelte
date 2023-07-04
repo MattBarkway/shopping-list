@@ -1,5 +1,5 @@
 <script>
-    import './styles.css';
+    import '../../public/styles.css';
     import github from '$lib/images/github.svg';
     import {Hamburger} from "svelte-hamburgers";
     import Menu from "./Menu.svelte";

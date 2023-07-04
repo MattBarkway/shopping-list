@@ -1,11 +1,11 @@
 # Use a Node.js base image
-FROM node:latest as builder
+FROM node:19.8.1-alpine as builder
 
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy package.json and yarn.lock files
-COPY shopping-list/package.json shopping-list/yarn.lock ./
+COPY package.json yarn.lock ./
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
@@ -19,8 +19,11 @@ RUN yarn build
 # Use a lightweight base image for the final container
 FROM nginx:alpine
 
-# Copy the built files to the NGINX document root
-COPY --from=builder /app/public /usr/share/nginx/html
+# Copy the custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the prerendered HTML file from the build stage to the Nginx directory
+COPY --from=builder /app/build/prerendered /usr/share/nginx/html
 
 # Expose the default HTTP port
 EXPOSE 80
