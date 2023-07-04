@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN yarn install --frozen-lockfile
+RUN yarn install --immutable
 
 # Copy the entire source code
 COPY . .
@@ -23,7 +23,7 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the prerendered HTML file from the build stage to the Nginx directory
-COPY --from=builder /app/build/prerendered /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
 
 # Expose the default HTTP port
 EXPOSE 80
