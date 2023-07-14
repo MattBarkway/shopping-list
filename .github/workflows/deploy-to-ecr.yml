@@ -1,0 +1,46 @@
+name: Build and Publish docker images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check backend changes
+        id: check-backend-changes
+        run: echo "BACKEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- backend/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
+
+      - name: Build and Publish backend
+#        if: always() && env.BACKEND_CHANGED == 'true'
+        uses: ./.github/actions/publish-image-to-ecr
+        with:
+          dockerfile: docker/backend.Dockerfile
+          ecr_registry: ${{ secrets.ECR_BACKEND }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_REGION }}
+          image_name: shopping-list-backend
+          context: backend
+
+      - name: Check frontend changes
+        id: check-frontend-changes
+        run: echo "FRONTEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- shopping-list/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
+
+      - name: Build and Publish frontend
+#        if: always() && env.FRONTEND_CHANGED == 'true'
+        uses: ./.github/actions/publish-image-to-ecr
+        with:
+          dockerfile: docker/frontend.Dockerfile
+          ecr_registry: ${{ secrets.ECR_FRONTEND }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_REGION }}
+          image_name: shopping-list-frontend
+          context: frontend
