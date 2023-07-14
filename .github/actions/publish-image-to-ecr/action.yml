@@ -45,7 +45,7 @@ runs:
 
     - name: Build Docker image
       shell: bash
-      run: docker build -t ${{ inputs.image_name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
+      run: docker build -t ${{ inputs.image_name }}:${{ github.sha }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
 
     - name: Tag Docker image
       shell: bash
