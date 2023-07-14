@@ -11,4 +11,4 @@ mydatabase.db
 .svelte-kit
 .DS_Store
 .terraform.lock.hcl
-*.tfstate
+*.tfstate*
