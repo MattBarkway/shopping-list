@@ -21,6 +21,9 @@ inputs:
   aws_region:
     description: 'The AWS region'
     required: true
+  context:
+    description: 'Docker build context'
+    required: true
 
 runs:
   using: 'composite'
@@ -42,7 +45,7 @@ runs:
 
     - name: Build Docker image
       shell: bash
-      run: docker build -t ${{ inputs.image_name }} -f ${{ inputs.dockerfile }} .
+      run: docker build -t ${{ inputs.image_name }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
 
     - name: Tag Docker image
       shell: bash
