@@ -49,7 +49,7 @@ runs:
 
     - name: Tag Docker image
       shell: bash
-      run: docker tag ${{ inputs.image_name }} ${{ inputs.ecr_registry }}/${{ inputs.image_name }}:${{ github.sha }}
+      run: docker tag ${{ inputs.image_name }}:${{ github.sha }} ${{ inputs.ecr_registry }}/${{ inputs.image_name }}:${{ github.sha }}
 
     - name: Push Docker image to ECR
       shell: bash
