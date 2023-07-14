@@ -20,8 +20,7 @@ jobs:
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/backend.Dockerfile
-          image_name: shopping-list-backend
-          ecr_registry: ${{ secrets.ECR_REGISTRY }}
+          ecr_registry: ${{ secrets.ECR_BACKEND }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ vars.AWS_REGION }}
@@ -36,8 +35,7 @@ jobs:
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/frontend.Dockerfile
-          image_name: shopping-list-frontend
-          ecr_registry: ${{ secrets.ECR_REGISTRY }}
+          ecr_registry: ${{ secrets.ECR_FRONTEND }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ vars.AWS_REGION }}
