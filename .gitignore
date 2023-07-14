@@ -12,3 +12,4 @@ mydatabase.db
 .DS_Store
 .terraform.lock.hcl
 *.tfstate*
+!tsconfig.json
