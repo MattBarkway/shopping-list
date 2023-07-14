@@ -45,8 +45,8 @@ runs:
 
     - name: Build Docker image
       shell: bash
-      run: docker build -t ${{ inputs.ecr_registry }}:${{ github.sha }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
+      run: docker build -t ${{ inputs.ecr_registry }}:latest -f ${{ inputs.dockerfile }} ${{ inputs.context }}
 
     - name: Push Docker image to ECR
       shell: bash
-      run: docker push ${{ inputs.ecr_registry }}:${{ github.sha }}
+      run: docker push ${{ inputs.ecr_registry }}:latest
