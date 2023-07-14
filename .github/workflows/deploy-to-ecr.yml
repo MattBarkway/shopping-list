@@ -3,9 +3,6 @@ name: Build and Publish docker images
 on:
   push:
 
-env:
-  AWS_REGION: <your-aws-region>
-
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
