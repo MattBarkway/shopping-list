@@ -24,6 +24,7 @@ inputs:
 
 runs:
   using: 'composite'
+  shell: bash
 
   steps:
     - name: Checkout repository
