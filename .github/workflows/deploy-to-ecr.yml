@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and Publish backend
 #        if: env.BACKEND_CHANGED == 'true'
-        uses: ./.github/actions/build-and-publish-docker-image
+        uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/backend.Dockerfile
           image_name: shopping-list-backend
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build and Publish frontend
 #        if: env.FRONTEND_CHANGED == 'true'
-        uses: ./.github/actions/build-and-publish-docker-image
+        uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/frontend.Dockerfile
           image_name: shopping-list-frontend
