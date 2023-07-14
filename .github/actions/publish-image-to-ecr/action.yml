@@ -43,16 +43,6 @@ runs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-#    - name: Build, tag, and push image to Amazon ECR
-#      shell: bash
-#      env:
-#        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#        ECR_REPOSITORY: ${{ inputs.image_name }}
-#        IMAGE_TAG: ${{ github.sha }}
-#      run: |
-#        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-#        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
     - name: Build Docker image
       shell: bash
       run: docker build -t ${{ inputs.ecr_registry }}:${{ github.sha }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
