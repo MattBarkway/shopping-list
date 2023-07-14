@@ -41,4 +41,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ vars.AWS_REGION }}
           image_name: shopping-list-frontend
-          context: shopping-list
+          context: frontend
