@@ -2,18 +2,13 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
     }
   }
 }
 
-module "ecr" {
-  source = "../ecr"
-}
-
 # Provider configuration
 provider "aws" {
-  region = "us-west-2"
+  region = "eu-west-2"
 }
 
 # VPC creation
@@ -25,7 +20,7 @@ resource "aws_vpc" "example_vpc" {
 resource "aws_subnet" "sl_subnet" {
   vpc_id                  = aws_vpc.example_vpc.id
   cidr_block              = "10.0.0.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "eu-west-2a"
 }
 
 # Internet Gateway creation
@@ -102,18 +97,8 @@ resource "aws_lb_listener" "backend_listener" {
   }
 }
 
-
 resource "aws_instance" "frontend_instance" {
-  ami           = aws_ecr_repository.e.name + ":" + var.ecr_image_name + ":" + var.ecr_image_tag
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.sl_subnet.id
-
-  # Add any additional configuration for your frontend instance
-}
-
-
-resource "aws_instance" "frontend_instance" {
-  ami           = data.aws_ecr_image.frontend_image.image_digest
+  ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.sl_subnet.id
 
@@ -121,20 +106,10 @@ resource "aws_instance" "frontend_instance" {
 }
 
 resource "aws_instance" "backend_instance" {
-  count         = data.aws_ecr_repository_image.latest_image.image_digest != "" ? 1 : 0
-  ami           = data.aws_ecr_image.backend_image.image_digest
+  ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.sl_subnet.id
 
   # Add any additional configuration for your backend instance
 }
 
-data "aws_ecr_image" "backend_image" {
-  repository_name = ecr..name
-  image_tag       = "latest"  # Replace with the desired image tag
-}
-
-data "aws_ecr_image" "frontend_image" {
-  repository_name = ecr.ecr_repository_name
-  image_tag       = "latest"  # Replace with the desired image tag
-}
