@@ -17,10 +17,16 @@ resource "aws_vpc" "example_vpc" {
 }
 
 # Subnet creation
-resource "aws_subnet" "sl_subnet" {
+resource "aws_subnet" "subnet_a" {
   vpc_id                  = aws_vpc.example_vpc.id
   cidr_block              = "10.0.0.0/24"
   availability_zone       = "eu-west-2a"
+}
+
+resource "aws_subnet" "subnet_b" {
+  vpc_id                  = aws_vpc.example_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "eu-west-2b"
 }
 
 # Internet Gateway creation
@@ -38,8 +44,13 @@ resource "aws_route_table" "example_route_table" {
   }
 }
 
-resource "aws_route_table_association" "example_association" {
-  subnet_id      = aws_subnet.sl_subnet.id
+resource "aws_route_table_association" "example_association_a" {
+  subnet_id      = aws_subnet.subnet_a.id
+  route_table_id = aws_route_table.example_route_table.id
+}
+
+resource "aws_route_table_association" "example_association_b" {
+  subnet_id      = aws_subnet.subnet_b.id
   route_table_id = aws_route_table.example_route_table.id
 }
 
@@ -47,14 +58,14 @@ resource "aws_route_table_association" "example_association" {
 resource "aws_lb" "frontend_lb" {
   name               = "frontend-lb"
   load_balancer_type = "application"
-  subnets            = [aws_subnet.sl_subnet.id]
+  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 }
 
 # Backend Load Balancer
 resource "aws_lb" "backend_lb" {
   name               = "backend-lb"
   load_balancer_type = "application"
-  subnets            = [aws_subnet.sl_subnet.id]
+  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 }
 
 # Frontend Target Group
@@ -100,7 +111,7 @@ resource "aws_lb_listener" "backend_listener" {
 resource "aws_instance" "frontend_instance" {
   ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.sl_subnet.id
+  subnet_id     = aws_subnet.subnet_a.id
 
   # Add any additional configuration for your frontend instance
 }
@@ -108,8 +119,7 @@ resource "aws_instance" "frontend_instance" {
 resource "aws_instance" "backend_instance" {
   ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.sl_subnet.id
+  subnet_id     = aws_subnet.subnet_b.id
 
   # Add any additional configuration for your backend instance
 }
-
