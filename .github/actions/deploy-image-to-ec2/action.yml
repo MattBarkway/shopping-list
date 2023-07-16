@@ -82,6 +82,7 @@ runs:
         port: 22
         envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
         script: |
+          sudo systemctl restart docker
           aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
           docker pull 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
           docker run 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest -d -p 8000:8000
