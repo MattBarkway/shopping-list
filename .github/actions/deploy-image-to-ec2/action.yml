@@ -68,14 +68,12 @@ runs:
         username: ${{ inputs.ec2_instance_username }}
         key: ${{ inputs.ssh_private_key }}
         port: 22
-        envs: |
-          AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
         script: |
+          aws configure
           sudo amazon-linux-extras install docker
           sudo service docker start
           sudo usermod -a -G docker ec2-user
-          docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }} <<< $(aws ecr get-login-password --region ${{ inputs.aws_region }})
+          docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }} <<< $(aws ecr get-login-password --region ${{ inputs.aws_region }} --aws-access-key ${{ inputs.aws_access_key_id }} --aws-secret-key ${{ inputs.aws_secret_access_key }})
           docker stop ${{ inputs.container_name }} || true
           docker rm ${{ inputs.container_name }} || true
           docker pull ${{ inputs.ecr_repository_url }}:latest
