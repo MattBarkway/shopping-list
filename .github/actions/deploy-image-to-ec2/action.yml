@@ -51,6 +51,16 @@ runs:
           --query "Reservations[].Instances[0].PublicIpAddress" \
           --output text)" >> $GITHUB_ENV
 
+#    - name: Manual deploy
+#      shell: bash
+#      run: |
+#        ssh ${{ inputs.ec2_instance_username }}@${{ env.EC2_INSTANCE_PUBLIC_IP }} << EOF
+#            docker stop ${{ inputs.container_name }} || true
+#            docker rm ${{ inputs.container_name }} || true
+#            docker pull ${{ inputs.ecr_repository_url }}:latest
+#            docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
+#          EOF
+
     - name: Run deployment script on EC2 instance
       uses: appleboy/ssh-action@master
       with:
@@ -59,9 +69,7 @@ runs:
         key: ${{ inputs.ssh_private_key }}
         port: 22
         script: |
-          ssh -i /home/${{ inputs.ec2_instance_username }}/your-key.pem ${{ inputs.ec2_instance_username }}@${{ inputs.ec2_instance_name }} << EOF
-            docker stop ${{ inputs.container_name }} || true
-            docker rm ${{ inputs.container_name }} || true
-            docker pull ${{ inputs.ecr_repository_url }}:latest
-            docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
-          EOF
+          docker stop ${{ inputs.container_name }} || true
+          docker rm ${{ inputs.container_name }} || true
+          docker pull ${{ inputs.ecr_repository_url }}:latest
+          docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
