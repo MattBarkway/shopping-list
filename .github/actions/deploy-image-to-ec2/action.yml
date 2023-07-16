@@ -61,6 +61,26 @@ runs:
 #            docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
 #          EOF
 
+    - name: Install docker and aws cli
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ inputs.ssh_private_key }}
+        port: 22
+        envs: |
+          AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
+        script: | 
+          sudo yum update -y
+          sudo yum install docker -y
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          sudo service docker start
+          sudo usermod -a -G docker ec2-user
+          aws --version
+
     - name: Run deployment script on EC2 instance
       uses: appleboy/ssh-action@master
       with:
@@ -72,12 +92,8 @@ runs:
           AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
         script: | 
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-          sudo amazon-linux-extras install docker
-          sudo service docker start
-          sudo usermod -a -G docker ec2-user
+          aws --version
+          docker --version
           aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }}
           docker stop ${{ inputs.container_name }} || true
           docker rm ${{ inputs.container_name }} || true
