@@ -41,29 +41,10 @@ runs:
     - name: Run deployment script on EC2 instance
       shell: bash
       run: |
-        command_id=$(aws ssm send-command \
+        aws ssm send-command \
           --document-name "AWS-RunShellScript" \
           --targets "Key=tag:Name,Values=${{ inputs.ec2_instance_name }}" \
           --parameters '{"commands":["docker stop ${{ inputs.container_name }} || true", "docker rm ${{ inputs.container_name }} || true", "docker pull ${{ inputs.ecr_repository_url }}:latest", "docker run -d -p 80:80 --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest"]}' \
           --query "Command.CommandId" \
           --output text \
-          --region ${{ inputs.aws_region }})
-
-        while true; do
-          status=$(aws ssm list-command-invocations \
-            --command-id "$command_id" \
-            --query "CommandInvocations[0].Status" \
-            --output text \
-            --region ${{ inputs.aws_region }})
-
-          if [[ "$status" == "Success" ]]; then
-            echo "::set-output name=result::success"
-            break
-          elif [[ "$status" == "Failed" || "$status" == "Cancelled" ]]; then
-            echo "::set-output name=result::failure"
-            exit 1
-          fi
-          echo "waiting on completion, status=$status."
-          echo "Sleeping for 5 seconds..."
-          sleep 5
-        done
+          --region ${{ inputs.aws_region }}
