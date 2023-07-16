@@ -37,6 +37,8 @@ jobs:
           aws_region: eu-west-2
           container_name: shopping-list-backend
           ec2_instance_name: backend-sl
+          ec2_instance_username: ec2-user
+          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
           ports: 8000:8000
 
       - name: Check frontend changes
@@ -65,4 +67,6 @@ jobs:
           aws_region: eu-west-2
           container_name: shopping-list-frontend
           ec2_instance_name: frontend-sl
+          ec2_instance_username: ec2-user
+          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
           ports: 80:80

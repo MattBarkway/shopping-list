@@ -23,6 +23,12 @@ inputs:
   ports:
     description: 'Port mapping for the docker run command'
     required: true
+  ssh_private_key:
+    description: 'SSH private key for connecting to the EC2 instance'
+    required: true
+  ec2_instance_username:
+    description: 'Username for SSH authentication to the EC2 instance'
+    required: true
 
 runs:
   using: 'composite'
@@ -31,20 +37,31 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Configure SSH
+      uses: webfactory/ssh-agent@v0.5.0
       with:
-        aws-access-key-id: ${{ inputs.aws_access_key_id }}
-        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
-        aws-region: ${{ inputs.aws_region }}
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+
+    - name: Transfer Dockerfile and scripts
+      uses: appleboy/scp-action@v1
+      with:
+        host: ${{ inputs.ec2_instance_name }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: .
+        target: /home/${{ inputs.ec2_instance_username }}
 
     - name: Run deployment script on EC2 instance
-      shell: bash
-      run: |
-        aws ssm send-command \
-          --document-name "AWS-RunShellScript" \
-          --targets "Key=tag:Name,Values=${{ inputs.ec2_instance_name }}" \
-          --parameters '{"commands":["docker stop ${{ inputs.container_name }} || true", "docker rm ${{ inputs.container_name }} || true", "docker pull ${{ inputs.ecr_repository_url }}:latest", "docker run -d -p 80:80 --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest"]}' \
-          --query "Command.CommandId" \
-          --output text \
-          --region ${{ inputs.aws_region }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ inputs.ec2_instance_name }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          ssh -i /home/${{ inputs.ec2_instance_username }}/your-key.pem ${{ inputs.ec2_instance_username }}@${{ inputs.ec2_instance_name }} << EOF
+            docker stop ${{ inputs.container_name }} || true
+            docker rm ${{ inputs.container_name }} || true
+            docker pull ${{ inputs.ecr_repository_url }}:latest
+            docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
+          EOF
