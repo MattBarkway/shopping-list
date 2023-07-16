@@ -43,7 +43,7 @@ runs:
         ssh-private-key: ${{ inputs.ssh_private_key }}
 
     - name: Transfer Dockerfile and scripts
-      uses: appleboy/scp-action@v1
+      uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ inputs.ec2_instance_name }}
         username: ${{ inputs.ec2_instance_username }}
