@@ -72,11 +72,12 @@ runs:
           AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
         script: | 
-          aws --version 
           sudo amazon-linux-extras install docker
           sudo service docker start
           sudo usermod -a -G docker ec2-user
-          docker login --username AWS -p $(aws ecr get-login-password --region ${{ inputs.aws_region }})
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }}
           docker stop ${{ inputs.container_name }} || true
           docker rm ${{ inputs.container_name }} || true
           docker pull ${{ inputs.ecr_repository_url }}:latest
