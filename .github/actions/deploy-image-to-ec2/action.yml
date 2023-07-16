@@ -68,9 +68,6 @@ runs:
         username: ${{ inputs.ec2_instance_username }}
         key: ${{ inputs.ssh_private_key }}
         port: 22
-        envs: |
-          AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
         script: | 
           sudo yum update -y
           sudo yum install docker -y
@@ -79,7 +76,6 @@ runs:
           sudo ./aws/install
           sudo service docker start
           sudo usermod -a -G docker ec2-user
-          aws --version
 
     - name: Run deployment script on EC2 instance
       uses: appleboy/ssh-action@master
@@ -99,8 +95,10 @@ runs:
         script: | 
           aws --version
           docker --version
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+          aws ecr get-login-password --region $AWS_REGION
+          
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
+          
           docker pull $ECR_URL:latest
           docker run -d -p $PORTS --name $CONTAINER_NAME $ECR_URL:latest
