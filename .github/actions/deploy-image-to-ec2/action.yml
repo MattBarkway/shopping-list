@@ -49,15 +49,20 @@ runs:
           --output text \
           --region ${{ inputs.aws_region }})
 
-        status=$(aws ssm list-command-invocations \
-          --command-id "$command_id" \
-          --query "CommandInvocations[0].Status" \
-          --output text \
-          --region ${{ inputs.aws_region }})
+        while true; do
+          status=$(aws ssm list-command-invocations \
+            --command-id "$command_id" \
+            --query "CommandInvocations[0].Status" \
+            --output text \
+            --region ${{ inputs.aws_region }})
 
-        if [[ "$status" == "Success" ]]; then
-          echo "Succeeded"
-        else
-          echo "$status"
-          exit 1
-        fi
+          if [[ "$status" == "Success" ]]; then
+            echo "::set-output name=result::success"
+            break
+          elif [[ "$status" == "Failed" || "$status" == "Cancelled" ]]; then
+            echo "::set-output name=result::failure"
+            exit 1
+          fi
+
+          sleep 5
+        done
