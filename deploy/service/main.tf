@@ -40,6 +40,9 @@ resource "aws_instance" "frontend_instance" {
   subnet_id     = aws_subnet.subnet_a.id
 
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
+  tags = {
+    Name = "frontend-sl"
+  }
 }
 
 resource "aws_instance" "backend_instance" {
@@ -48,6 +51,9 @@ resource "aws_instance" "backend_instance" {
   subnet_id     = aws_subnet.subnet_b.id
 
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
+  tags = {
+    Name = "backend-sl"
+  }
 }
 
 resource "aws_security_group" "frontend_sg" {
