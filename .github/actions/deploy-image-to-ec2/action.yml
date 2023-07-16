@@ -82,10 +82,10 @@ runs:
         port: 22
         envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
         script: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
 
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
           
           docker pull $ECR_URL/$CONTAINER_NAME:latest
-          docker run -d -p $PORTS --name $CONTAINER_NAME $ECR_URL:latest
+          docker run $ECR_URL/$CONTAINER_NAME:latest -d -p $PORTS
