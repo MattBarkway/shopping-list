@@ -69,10 +69,9 @@ runs:
         key: ${{ inputs.ssh_private_key }}
         port: 22
         script: |
-          sudo yum update -y
-          sudo yum install -y docker
+          sudo amazon-linux-extras install docker
           sudo service docker start
-          sudo usermod -a -G docker $(whoami)
+          sudo usermod -a -G docker ec2-user
           docker stop ${{ inputs.container_name }} || true
           docker rm ${{ inputs.container_name }} || true
           docker pull ${{ inputs.ecr_repository_url }}:latest
