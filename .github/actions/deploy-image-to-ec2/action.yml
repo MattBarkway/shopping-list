@@ -41,8 +41,23 @@ runs:
     - name: Run deployment script on EC2 instance
       shell: bash
       run: |
-        aws ssm send-command \
+        command_id=$(aws ssm send-command \
           --document-name "AWS-RunShellScript" \
           --targets "Key=tag:Name,Values=${{ inputs.ec2_instance_name }}" \
-          --parameters '{"commands":["docker stop ${{ inputs.container_name }} || true", "docker rm ${{ inputs.container_name }} || true", "docker pull ${{ inputs.ecr_repository_url }}:latest", "docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest"]}' \
-          --region ${{ inputs.aws_region }}
+          --parameters '{"commands":["docker stop ${{ inputs.container_name }} || true", "docker rm ${{ inputs.container_name }} || true", "docker pull ${{ inputs.ecr_repository_url }}:latest", "docker run -d -p 80:80 --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest"]}' \
+          --query "Command.CommandId" \
+          --output text \
+          --region ${{ inputs.aws_region }})
+
+        status=$(aws ssm list-command-invocations \
+          --command-id "$command_id" \
+          --query "CommandInvocations[0].Status" \
+          --output text \
+          --region ${{ inputs.aws_region }})
+
+        if [[ "$status" == "Success" ]]; then
+          echo "::set-output name=result::success"
+        else
+          echo "::set-output name=result::failure"
+          exit 1
+        fi
