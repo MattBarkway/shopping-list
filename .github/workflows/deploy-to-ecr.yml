@@ -15,17 +15,17 @@ jobs:
         id: check-backend-changes
         run: echo "BACKEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- backend/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
 
-#      - name: Build and Publish backend
-##        if: always() && env.BACKEND_CHANGED == 'true'
-#        uses: ./.github/actions/publish-image-to-ecr
-#        with:
-#          dockerfile: docker/backend.Dockerfile
-#          ecr_registry: ${{ secrets.ECR_BACKEND }}
-#          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws_region: ${{ vars.AWS_REGION }}
-#          image_name: shopping-list-backend
-#          context: backend
+      - name: Build and Publish backend
+#        if: always() && env.BACKEND_CHANGED == 'true'
+        uses: ./.github/actions/publish-image-to-ecr
+        with:
+          dockerfile: docker/backend.Dockerfile
+          ecr_registry: ${{ secrets.ECR_BACKEND }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_REGION }}
+          image_name: shopping-list-backend
+          context: backend
 
       - name: Deploy to EC2
 #        if: env.BACKEND_CHANGED == 'true'
