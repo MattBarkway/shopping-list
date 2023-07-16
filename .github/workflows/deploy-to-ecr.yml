@@ -37,6 +37,7 @@ jobs:
           aws_region: eu-west-2
           container_name: shopping-list-backend
           ec2_instance_name: backend-sl
+          ports: 8000:8000
 
       - name: Check frontend changes
         id: check-frontend-changes
@@ -64,3 +65,4 @@ jobs:
           aws_region: eu-west-2
           container_name: shopping-list-frontend
           ec2_instance_name: frontend-sl
+          ports: 80:80
