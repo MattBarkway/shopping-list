@@ -47,7 +47,7 @@ runs:
       with:
         host: ${{ inputs.ec2_instance_name }}
         username: ${{ inputs.ec2_instance_username }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        key: ${{ inputs.ssh_private_key }}
         source: .
         target: /home/${{ inputs.ec2_instance_username }}
 
@@ -56,7 +56,7 @@ runs:
       with:
         host: ${{ inputs.ec2_instance_name }}
         username: ${{ inputs.ec2_instance_username }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        key: ${{ inputs.ssh_private_key }}
         port: 22
         script: |
           ssh -i /home/${{ inputs.ec2_instance_username }}/your-key.pem ${{ inputs.ec2_instance_username }}@${{ inputs.ec2_instance_name }} << EOF
