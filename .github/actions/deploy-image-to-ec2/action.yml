@@ -89,5 +89,5 @@ runs:
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
           
-          docker pull $ECR_URL:latest
+          docker pull $ECR_URL/$CONTAINER_NAME:latest
           docker run -d -p $PORTS --name $CONTAINER_NAME $ECR_URL:latest
