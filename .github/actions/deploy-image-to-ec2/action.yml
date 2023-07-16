@@ -56,8 +56,8 @@ runs:
           --region ${{ inputs.aws_region }})
 
         if [[ "$status" == "Success" ]]; then
-          echo "::set-output name=result::success"
+          echo "Succeeded"
         else
-          echo "::set-output name=result::failure"
+          echo "$status"
           exit 1
         fi
