@@ -51,17 +51,6 @@ runs:
           --query "Reservations[].Instances[0].PublicIpAddress" \
           --output text)" >> $GITHUB_ENV
 
-    - name: Transfer Dockerfile and scripts
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
-        username: ${{ inputs.ec2_instance_username }}
-        key: ${{ inputs.ssh_private_key }}
-        source: .
-        target: /home/${{ inputs.ec2_instance_username }}
-
-
-
     - name: Run deployment script on EC2 instance
       uses: appleboy/ssh-action@master
       with:
