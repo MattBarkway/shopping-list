@@ -83,11 +83,11 @@ runs:
         envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
         script: |
           sudo systemctl restart docker
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
-
+          
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
-
+          
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
           docker pull $ECR_URL/$CONTAINER_NAME:latest
           docker run -d -p $PORTS $ECR_URL/$CONTAINER_NAME:latest
 #          aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
