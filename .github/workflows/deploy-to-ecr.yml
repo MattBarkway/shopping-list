@@ -31,7 +31,7 @@ jobs:
 #        if: env.BACKEND_CHANGED == 'true'
         uses: ./.github/actions/deploy-image-to-ec2
         with:
-          ecr_repository_url: ${{ secrets.ECR_BACKEND }}
+          ecr_repository_url: ${{ secrets.ECR_BASE }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: eu-west-2
@@ -61,7 +61,7 @@ jobs:
 #        if: env.FRONTEND_CHANGED == 'true'
         uses: ./.github/actions/deploy-image-to-ec2
         with:
-          ecr_repository_url: ${{ secrets.ECR_BACKEND }}
+          ecr_repository_url: ${{ secrets.ECR_BASE }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: eu-west-2
