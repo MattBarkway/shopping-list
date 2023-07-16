@@ -37,6 +37,7 @@ resource "aws_route_table" "route_table" {
 resource "aws_instance" "frontend_instance" {
   ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
+  associate_public_ip_address = true
   subnet_id     = aws_subnet.subnet_a.id
 
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
@@ -48,6 +49,7 @@ resource "aws_instance" "frontend_instance" {
 resource "aws_instance" "backend_instance" {
   ami           = "ami-06464c878dbe46da4"
   instance_type = "t2.micro"
+  associate_public_ip_address = true
   subnet_id     = aws_subnet.subnet_b.id
 
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
