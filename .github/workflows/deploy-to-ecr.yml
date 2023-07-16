@@ -32,8 +32,8 @@ jobs:
         uses: ./.github/actions/deploy-image-to-ec2
         with:
           ecr_repository_url: 796680308813.dkr.ecr.eu-west-2.amazonaws.com
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_access_key_id: ${{ vars.ACCESS_KEY_ID2 }}
+          aws_secret_access_key: ${{ vars.AWS_SECRET2 }}
           aws_region: eu-west-2
           container_name: shopping-list-backend
           ec2_instance_name: backend-sl
