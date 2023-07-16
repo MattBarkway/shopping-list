@@ -63,6 +63,7 @@ runs:
             echo "::set-output name=result::failure"
             exit 1
           fi
-          echo "not finished yet"
+          echo "waiting on completion, status=$status."
+          echo "Sleeping for 5 seconds..."
           sleep 5
         done
