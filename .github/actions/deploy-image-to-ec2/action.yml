@@ -82,6 +82,12 @@ runs:
         envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
         script: |
           sudo systemctl restart docker
+          echo "access key $AWS_ACCESS_KEY_ID"
+          echo "secret key $AWS_SECRET_ACCESS_KEY"
+          echo "region $AWS_REGION"
+          echo "ecr url $ECR_URL"
+          echo "container name $CONTAINER_NAME"
+          echo "ports $PORTS"
 
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
