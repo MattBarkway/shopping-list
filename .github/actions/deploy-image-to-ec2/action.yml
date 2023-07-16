@@ -83,19 +83,24 @@ runs:
 
     - name: Run deployment script on EC2 instance
       uses: appleboy/ssh-action@master
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+        AWS_REGION: ${{ inputs.aws_region }}
+        ECR_URL: =${{ inputs.ecr_repository_url }}
+        CONTAINER_NAME: ${{ inputs.container_name }}
+        PORTS: ${{ inputs.ports }}
       with:
         host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
         username: ${{ inputs.ec2_instance_username }}
         key: ${{ inputs.ssh_private_key }}
         port: 22
-        envs: |
-          AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
+        envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
         script: | 
           aws --version
           docker --version
-          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }}
-          docker stop ${{ inputs.container_name }} || true
-          docker rm ${{ inputs.container_name }} || true
-          docker pull ${{ inputs.ecr_repository_url }}:latest
-          docker run -d -p ${{ inputs.ports }} --name ${{ inputs.container_name }} ${{ inputs.ecr_repository_url }}:latest
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+          docker stop $CONTAINER_NAME || true
+          docker rm $CONTAINER_NAME || true
+          docker pull $ECR_URL:latest
+          docker run -d -p $PORTS --name $CONTAINER_NAME $ECR_URL:latest
