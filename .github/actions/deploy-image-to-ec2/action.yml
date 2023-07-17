@@ -37,37 +37,36 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up SSH private key
-      shell: bash
-      run: |
-        mkdir -p $HOME/.ssh
-        echo "${{ inputs.ssh_private_key }}" > $HOME/.ssh/id_rsa
-        chmod 600 $HOME/.ssh/id_rsa
+    - name: Configure SSH
+      uses: webfactory/ssh-agent@v0.5.0
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
 
     - name: Get EC2 IP
       shell: bash
       id: get-public-ip
       run: |
         echo "EC2_INSTANCE_PUBLIC_IP=$(aws ec2 describe-instances \
-          --filters 'Name=tag:Name,Values=${{ inputs.ec2_instance_name }}' \
-          --query 'Reservations[].Instances[0].PublicIpAddress' \
+          --filters "Name=tag:Name,Values=${{ inputs.ec2_instance_name }}" \
+          --query "Reservations[].Instances[0].PublicIpAddress" \
           --output text)" >> $GITHUB_ENV
 
     - name: Install docker and aws cli
-      shell: bash
-      run: |
-        ssh -i $HOME/.ssh/id_rsa \
-          -o StrictHostKeyChecking=no \
-          -o UserKnownHostsFile=/dev/null \
-          -l ${{ inputs.ec2_instance_username }} ${{ env.EC2_INSTANCE_PUBLIC_IP }} \
-          'sudo yum update -y && \
-          sudo yum install docker -y && \
-          sudo yum install aws-cli -y && \
-          sudo service docker start && \
-          sudo usermod -a -G docker ec2-user'
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ inputs.ssh_private_key }}
+        port: 22
+        script: | 
+          sudo yum update -y
+          sudo yum install docker -y
+          sudo yum install aws-cli -y
+          sudo service docker start
+          sudo usermod -a -G docker ec2-user
 
     - name: Run deployment script on EC2 instance
-      shell: bash
+      uses: appleboy/ssh-action@master
       env:
         AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
