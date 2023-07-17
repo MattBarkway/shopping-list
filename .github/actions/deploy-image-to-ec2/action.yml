@@ -75,20 +75,22 @@ runs:
         ECR_URL: =${{ inputs.ecr_repository_url }}
         CONTAINER_NAME: ${{ inputs.container_name }}
         PORTS: ${{ inputs.ports }}
-      run: |
-        ssh -i $HOME/.ssh/id_rsa \
-          -o StrictHostKeyChecking=no \
-          -o UserKnownHostsFile=/dev/null \
-          -l ${{ inputs.ec2_instance_username }} ${{ env.EC2_INSTANCE_PUBLIC_IP }} \
-          'sudo systemctl restart docker && \
-          docker stop ${{ inputs.container_name }} || true && \
-          docker rm ${{ inputs.container_name }} || true && \
-          docker login -u AWS -p $(aws ecr get-login-password --region ${{ inputs.aws_region }}) ${{ inputs.ecr_repository_url }} && \
-          echo ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest && \
-          docker pull ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest && \
-          docker run -d -p ${{ inputs.ports }} ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest'
-
-    - name: Cleanup SSH private key
-      shell: bash
-      run: |
-        rm $HOME/.ssh/id_rsa
+      with:
+        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ inputs.ssh_private_key }}
+        port: 22
+        envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_URL,CONTAINER_NAME,PORTS
+        script: |
+          sudo systemctl restart docker
+          aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
+          docker pull 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
+          docker run 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest -d -p 8000:8000
+#          printenv
+#          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+#
+#          docker stop $CONTAINER_NAME || true
+#          docker rm $CONTAINER_NAME || true
+#
+#          docker pull $ECR_URL/$CONTAINER_NAME:latest
+#          docker run $ECR_URL/$CONTAINER_NAME:latest -d -p $PORTS
