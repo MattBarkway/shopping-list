@@ -1,0 +1,101 @@
+name: Build and Push Docker
+description: yes
+
+inputs:
+  ecr_repository_url:
+    description: 'ECR repository URL'
+    required: true
+  aws_access_key_id:
+    description: 'The AWS access key ID'
+    required: true
+  aws_secret_access_key:
+    description: 'The AWS secret access key'
+    required: true
+  aws_region:
+    description: 'The AWS region'
+    required: true
+  container_name:
+    description: 'Name of the container'
+    required: true
+  ec2_instance_name:
+    description: 'Name of the EC2 instance'
+    required: true
+  ports:
+    description: 'Port mapping for the docker run command'
+    required: true
+  ssh_private_key:
+    description: 'SSH private key for connecting to the EC2 instance'
+    required: true
+  ec2_instance_username:
+    description: 'Username for SSH authentication to the EC2 instance'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Login to AWS ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Configure SSH
+      uses: webfactory/ssh-agent@v0.5.0
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+
+    - name: Get EC2 IP
+      shell: bash
+      id: get-public-ip
+      run: |
+        echo "EC2_INSTANCE_PUBLIC_IP=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=${{ inputs.ec2_instance_name }}" \
+          --query "Reservations[].Instances[0].PublicIpAddress" \
+          --output text)" >> $GITHUB_ENV
+
+    - name: Install docker and aws cli
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ inputs.ssh_private_key }}
+        port: 22
+        script: | 
+          sudo yum update -y
+          sudo yum install docker -y
+          sudo yum install aws-cli -y
+          sudo service docker start
+          sudo usermod -a -G docker ec2-user
+
+    - name: Run deployment script on EC2 instance
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.EC2_INSTANCE_PUBLIC_IP }}
+        username: ${{ inputs.ec2_instance_username }}
+        key: ${{ inputs.ssh_private_key }}
+        port: 22
+        script: |
+          sudo systemctl restart docker
+          export AWS_REGION=${{ inputs.aws_region }}
+          export AWS_ACCESS_KEY_ID=${{ inputs.aws_access_key_id }}
+          export AWS_SECRET_ACCESS_KEY=${{ inputs.aws_secret_access_key }}
+          export ECR_URL=${{ inputs.ecr_repository_url }}
+          export CONTAINER_NAME=${{ inputs.container_name }}
+          export PORTS=${{ inputs.ports }}
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+          docker pull $ECR_URL/$CONTAINER_NAME:latest
+          docker run -d -p $PORTS $ECR_URL/$CONTAINER_NAME:latest
+
+#          aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
+#          docker pull 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
+#          docker run -d -p 80:8000 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
+

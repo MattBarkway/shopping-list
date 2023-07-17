@@ -2,8 +2,6 @@ name: Build and Publish docker images
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   build-and-publish:
@@ -18,7 +16,7 @@ jobs:
         run: echo "BACKEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- backend/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
 
       - name: Build and Publish backend
-#        if: always() && env.BACKEND_CHANGED == 'true'
+        if: always() && env.BACKEND_CHANGED == 'true'
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/backend.Dockerfile
@@ -29,12 +27,26 @@ jobs:
           image_name: shopping-list-backend
           context: backend
 
+      - name: Deploy to EC2
+        if: env.BACKEND_CHANGED == 'true'
+        uses: ./.github/actions/deploy-image-to-ec2
+        with:
+          ecr_repository_url: ${{ secrets.ECR_BASE }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: eu-west-2
+          container_name: shopping-list-backend
+          ec2_instance_name: backend-sl
+          ec2_instance_username: ec2-user
+          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
+          ports: 80:8000
+
       - name: Check frontend changes
         id: check-frontend-changes
-        run: echo "FRONTEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- shopping-list/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
+        run: echo "FRONTEND_CHANGED=$(if [ -n "$(git diff --name-only ${{ github.base_ref }}... -- frontend/)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_ENV
 
       - name: Build and Publish frontend
-#        if: always() && env.FRONTEND_CHANGED == 'true'
+        if: always() && env.FRONTEND_CHANGED == 'true'
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/frontend.Dockerfile
@@ -44,3 +56,17 @@ jobs:
           aws_region: ${{ vars.AWS_REGION }}
           image_name: shopping-list-frontend
           context: frontend
+
+      - name: Deploy to EC2
+        if: env.FRONTEND_CHANGED == 'true'
+        uses: ./.github/actions/deploy-image-to-ec2
+        with:
+          ecr_repository_url: ${{ secrets.ECR_BASE }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: eu-west-2
+          container_name: shopping-list-frontend
+          ec2_instance_name: frontend-sl
+          ec2_instance_username: ec2-user
+          ssh_private_key: ${{ secrets.PRIVATE_KEY }}
+          ports: 80:80
