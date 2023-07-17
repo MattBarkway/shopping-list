@@ -83,7 +83,7 @@ runs:
           'sudo systemctl restart docker && \
           docker stop ${{ inputs.container_name }} || true && \
           docker rm ${{ inputs.container_name }} || true && \
-          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.ecr_repository_url }} && \
+          docker login -u AWS -p $(aws ecr get-login-password --region ${{ inputs.aws_region }}) ${{ inputs.ecr_repository_url }} && \
           echo ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest && \
           docker pull ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest && \
           docker run -d -p ${{ inputs.ports }} ${{ inputs.ecr_repository_url }}/${{ inputs.container_name }}:latest'
