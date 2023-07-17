@@ -84,4 +84,4 @@ runs:
           sudo systemctl restart docker
           aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 796680308813.dkr.ecr.eu-west-2.amazonaws.com
           docker pull 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
-          docker run -d -p 8000:8000 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
+          docker run -d -p 80:8000 796680308813.dkr.ecr.eu-west-2.amazonaws.com/shopping-list-backend:latest
