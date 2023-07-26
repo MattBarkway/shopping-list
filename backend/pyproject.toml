@@ -8,16 +8,50 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = {extras = ["all"], version = "^0.98.0"}
-peewee = "^3.16.2"
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
+alembic = "^1.11.1"
+psycopg2-binary = "^2.9.6"
+asyncpg = "^0.28.0"
+sendgrid = "^6.10.0"
+greenlet = "^2.0.2"
+bcrypt = "^4.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 mypy = "^1.4.0"
 ruff = "^0.0.275"
+pytest = "^7.4.0"
+pytest-docker = "^2.0.0"
+pytest-env = "^0.8.2"
+pytest-asyncio = "^0.21.1"
+pytest-mock = "^3.11.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
+# Directories that are not visited by pytest collector:
+norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__", "alembic"]
+doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+# Extra options:
+addopts = [
+    "--strict-markers",
+    "--tb=short",
+    "--doctest-modules",
+    "--doctest-continue-on-failure",
+    "-v",
+    "--asyncio-mode=auto",
+]
+env = [
+    "DB_USER = postgres",
+    "DB_PASSWORD = postgres",
+    "KEYCLOAK_ADMIN = admin",
+    "KEYCLOAK_ADMIN_PASSWORD = password",
+    "POSTGRES_PORT = 5432",
+    "KEYCLOAK_PORT = 8080"
+]

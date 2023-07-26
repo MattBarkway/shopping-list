@@ -208,7 +208,7 @@ resource "aws_db_instance" "sl_db_instance" {
   parameter_group_name      = aws_db_parameter_group.db_params.name
   db_subnet_group_name      = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids    = [aws_security_group.db_sg.id]
-  publicly_accessible       = false
+  publicly_accessible       = false  // TODO change - figure out how to access
   backup_retention_period   = 7
   multi_az                  = false
   skip_final_snapshot       = true
