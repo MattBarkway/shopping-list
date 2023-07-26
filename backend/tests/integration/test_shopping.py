@@ -53,7 +53,7 @@ class TestShopping:
         app.dependency_overrides = {}
 
     def test_get_shopping_lists(
-        self, app_url, override_auth, dummy_items, dummy_items2
+        self, app_url, override_auth, dummy_shopping_list, dummy_shopping_list2
     ):
         response = self.test_client.get(
             f"{app_url}/api/v1/shopping", headers={"Authorization": "Bearer foo"}
@@ -64,7 +64,7 @@ class TestShopping:
             {"id": 2, "name": "sl2", "owner": "foo"},
         ]
 
-    def test_get_shopping_list(self, app_url, override_auth, dummy_items, dummy_items2):
+    def test_get_shopping_list(self, app_url, override_auth, dummy_shopping_list, dummy_shopping_list2):
         response = self.test_client.get(
             f"{app_url}/api/v1/shopping/1", headers={"Authorization": "Bearer foo"}
         )

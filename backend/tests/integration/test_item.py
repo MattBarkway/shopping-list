@@ -99,11 +99,12 @@ class TestItem:
         yield dummy_user
         app.dependency_overrides = {}
 
-    def test_get_shopping_lists(
+    def test_get_items(
         self, app_url, override_auth, dummy_items, dummy_items2
     ):
+        sl_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/shopping", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/item/{sl_id}", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
         assert response.json() == [
@@ -111,22 +112,22 @@ class TestItem:
             {"id": 2, "name": "sl2", "owner": "foo"},
         ]
 
-    def test_get_shopping_list(self, app_url, override_auth, dummy_items, dummy_items2):
+    def test_get_item(
+        self, app_url, override_auth, dummy_items, dummy_items2
+    ):
+        sl_id = 1
+        item_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/shopping/1", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/item/{sl_id}/item/{item_id}", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
-        assert response.json() == {
-            "id": 1,
-            "name": "sl",
-            "owner": "foo",
-        }
+        assert response.json() == {"id": 1, "name": "sl", "owner": "foo"}
 
-    def test_create_shopping_list(
+    def test_create_item(
         self, app_url, override_auth, db_session, app_settings
     ):
         response = self.test_client.post(
-            f"{app_url}/api/v1/shopping",
+            f"{app_url}/api/v1/item/",
             headers={"Authorization": "Bearer foo"},
             json={
                 "name": "groceries",
