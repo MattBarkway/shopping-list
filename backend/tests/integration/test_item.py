@@ -104,7 +104,7 @@ class TestItem:
     ):
         sl_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/item/{sl_id}", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/shopping/{sl_id}/items", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
         assert response.json() == [
@@ -118,7 +118,7 @@ class TestItem:
         sl_id = 1
         item_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/item/{sl_id}/item/{item_id}", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/shopping/{sl_id}/items/{item_id}", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
         assert response.json() == {"id": 1, "name": "sl", "owner": "foo"}
@@ -126,8 +126,9 @@ class TestItem:
     def test_create_item(
         self, app_url, override_auth, db_session, app_settings
     ):
+        sl_id = 1
         response = self.test_client.post(
-            f"{app_url}/api/v1/item/",
+            f"{app_url}/api/v1/shopping/{sl_id}/items",
             headers={"Authorization": "Bearer foo"},
             json={
                 "name": "groceries",
