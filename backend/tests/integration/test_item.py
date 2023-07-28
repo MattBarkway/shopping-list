@@ -72,7 +72,6 @@ class TestItem:
         sl = ShoppingList(user_id=dummy_user.id, name="sl")
         db_session.add(sl)
         db_session.commit()
-        db_session.flush(sl)
         return sl
 
     @pytest.fixture
@@ -80,7 +79,6 @@ class TestItem:
         sl2 = ShoppingList(user_id=dummy_user.id, name="sl2")
         db_session.add(sl2)
         db_session.commit()
-        db_session.flush(sl2)
         return sl2
 
     @pytest.fixture
@@ -90,7 +88,6 @@ class TestItem:
         )
         db_session.add(user)
         db_session.commit()
-        db_session.flush(user)
         return user
 
     @pytest.fixture
@@ -99,46 +96,52 @@ class TestItem:
         yield dummy_user
         app.dependency_overrides = {}
 
-    def test_get_items(
-        self, app_url, override_auth, dummy_items, dummy_items2
-    ):
+    def test_get_items(self, app_url, override_auth, dummy_items, dummy_items2):
         sl_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/shopping/{sl_id}/items", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/shopping/{sl_id}/items",
+            headers={"Authorization": "Bearer foo"},
         )
         assert response.status_code == 200
         assert response.json() == [
-            {"id": 1, "name": "sl", "owner": "foo"},
-            {"id": 2, "name": "sl2", "owner": "foo"},
+            {"description": "", "id": 1, "name": "carrot", "quantity": 1},
+            {"description": "", "id": 2, "name": "potato", "quantity": 1},
+            {"description": "", "id": 3, "name": "cabbage", "quantity": 1},
+            {"description": "", "id": 4, "name": "courgette", "quantity": 1},
         ]
 
-    def test_get_item(
-        self, app_url, override_auth, dummy_items, dummy_items2
-    ):
+    def test_get_item(self, app_url, override_auth, dummy_items, dummy_items2):
         sl_id = 1
         item_id = 1
         response = self.test_client.get(
-            f"{app_url}/api/v1/shopping/{sl_id}/items/{item_id}", headers={"Authorization": "Bearer foo"}
+            f"{app_url}/api/v1/shopping/{sl_id}/items/{item_id}",
+            headers={"Authorization": "Bearer foo"},
         )
         assert response.status_code == 200
-        assert response.json() == {"id": 1, "name": "sl", "owner": "foo"}
+        assert response.json() == [
+            {"description": "", "id": 1, "name": "carrot", "quantity": 1}
+        ]
 
     def test_create_item(
-        self, app_url, override_auth, db_session, app_settings
+        self, app_url, override_auth, db_session, app_settings, dummy_shopping_list
     ):
-        sl_id = 1
         response = self.test_client.post(
-            f"{app_url}/api/v1/shopping/{sl_id}/items",
+            f"{app_url}/api/v1/shopping/{dummy_shopping_list.id}/items",
             headers={"Authorization": "Bearer foo"},
             json={
-                "name": "groceries",
-                "items": [],
+                "name": "A carrot",
+                "description": "yep it sure is",
+                "quantity": 800,
             },
         )
         assert response.status_code == 201
         assert response.json() == {"id": 1}
 
-        stmt = select(ShoppingList)
+        stmt = select(Item).where(ShoppingList.id == dummy_shopping_list.id)
         cursor = db_session.execute(stmt)
-        shopping_list = cursor.scalar()
-        assert shopping_list.id == 1
+        items = cursor.scalars().all()
+        assert len(items) == 1
+        item = items[0]
+        assert item.name == "A carrot"
+        assert item.description == "yep it sure is"
+        assert item.quantity == 800

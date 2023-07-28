@@ -1,3 +1,7 @@
-import fastapi
+from fastapi import APIRouter
 
-router = fastapi.APIRouter(prefix="/shopping", tags=["Shopping"])
+from api.v1.lists import item, shopping
+
+router = APIRouter()
+router.include_router(item.router)
+router.include_router(shopping.router)

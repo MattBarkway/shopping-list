@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, APIRouter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
@@ -7,10 +7,12 @@ from api.payloads import (
     CreateShoppingList,
     UpdateShoppingList,
     CreatedResponse,
-    ExistingShoppingList, )
+    ExistingShoppingList,
+)
 from api.utils import get_session, get_current_user
-from api.v1.lists.router import router
 from models.schema import ShoppingList, User
+
+router = APIRouter()
 
 
 @router.get("/")
@@ -89,5 +91,3 @@ async def delete_shopping_list(
     shopping_list = cursor.scalar()
     await session.delete(shopping_list)
     await session.commit()
-
-
