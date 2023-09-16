@@ -1,33 +1,26 @@
 """Security helpers."""
+import typing
 from datetime import timedelta
 
 import fastapi
+from api.utils import DBSession, Token, authenticate_user, create_access_token, hash_pw
+from exceptions import ValidationError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from itsdangerous import URLSafeTimedSerializer, encoding
-from sendgrid import SendGridAPIClient, Mail
-from sqlalchemy import select, update
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.utils import (
-    Token,
-    authenticate_user,
-    create_access_token,
-    hash_pw,
-    get_session,
-)
-from exceptions import ValidationError
 from models.schema import User
+from sendgrid import Mail, SendGridAPIClient
 from settings import settings
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 router = fastapi.APIRouter()
 
 
 @router.post("/token", response_model=Token)
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    session: AsyncSession = Depends(get_session),
+    form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: DBSession,
 ) -> dict[str, str]:
     """Login endpoint.
 
@@ -55,8 +48,8 @@ async def login(
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    session: AsyncSession = Depends(get_session),
+    form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: DBSession,
 ) -> None:
     """Register endpoint.
 
@@ -87,16 +80,15 @@ async def register(
         to_emails=form_data.username,
         subject="Verify your sentinel account",
         html_content=(
-            f'<a href="{settings.HOST}/v1/auth/validate/{clean_token}/">click here</a> to verify your account'
+            f'<a href="{settings.HOST}/v1/auth/validate/{clean_token}/">'
+            f"click here</a> to verify your account"
         ),
     )
     sendgrid.send(message)
 
 
 @router.get("/validate/{token}/", status_code=status.HTTP_200_OK)
-async def validate(
-    token: str, session: AsyncSession = Depends(get_session)
-) -> dict[str, str]:
+async def validate(token: str, session: DBSession) -> dict[str, str]:
     """Validate endpoint.
 
     Args:

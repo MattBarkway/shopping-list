@@ -1,11 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-
 from api.utils import get_current_user
+from fastapi.testclient import TestClient
 from main import app
-from models.schema import User, ShoppingList, Item, SLBase
+from models.schema import Item, ShoppingList, SLBase, User
 from settings import Settings
+from sqlalchemy import create_engine, select
 
 
 @pytest.mark.integration
@@ -145,3 +144,50 @@ class TestItem:
         assert item.name == "A carrot"
         assert item.description == "yep it sure is"
         assert item.quantity == 800
+
+    def test_update_item(
+        self,
+        app_url,
+        override_auth,
+        db_session,
+        app_settings,
+        dummy_shopping_list,
+        dummy_items,
+    ):
+        response = self.test_client.patch(
+            f"{app_url}/api/v1/shopping/{dummy_shopping_list.id}/items/{dummy_items[0].id}",
+            headers={"Authorization": "Bearer foo"},
+            json={
+                "quantity": 2,
+            },
+        )
+        assert response.status_code == 200
+        stmt = select(Item).where(Item.id == dummy_items[0].id)
+        cursor = db_session.execute(stmt)
+        item = cursor.scalar_one()
+
+        db_session.refresh(item)
+
+        assert item.name == "carrot"
+        assert item.description == ""
+        assert item.quantity == 2
+
+    def test_remove_item(
+        self,
+        app_url,
+        override_auth,
+        db_session,
+        app_settings,
+        dummy_shopping_list,
+        dummy_items,
+    ):
+        response = self.test_client.delete(
+            f"{app_url}/api/v1/shopping/{dummy_shopping_list.id}/items/{dummy_items[0].id}",
+            headers={"Authorization": "Bearer foo"},
+        )
+        assert response.status_code == 200
+
+        stmt = select(Item).where(Item.id == dummy_items[0].id)
+        cursor = db_session.execute(stmt)
+        item = cursor.scalar()
+        assert item is None

@@ -1,0 +1,18 @@
+name: 'Lint JS'
+description: 'Lint some JS'
+inputs:
+  working-directory:
+    description: 'Path to the JS package'
+    required: true
+    default: './'
+runs:
+  using: 'composite'
+  steps:
+    - name: npm install
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm install
+    - name: ESlint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npx eslint

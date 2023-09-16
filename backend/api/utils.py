@@ -1,19 +1,18 @@
 """Utilities for the API."""
-from collections.abc import Generator
+import typing
 from datetime import datetime, timedelta
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from models.schema import User
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from settings import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette import status
-
-from models.schema import User
-from settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  # noqa: S106
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,7 +25,7 @@ CREDENTIALS_EXCEPTION = HTTPException(
 )
 
 
-async def get_session() -> Generator[AsyncSession, None, None]:
+async def get_session() -> typing.AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine(settings.ASYNC_DB_URL, echo=True)
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
@@ -56,7 +55,7 @@ class Token(BaseModel):
     token_type: str
 
 
-async def get_user(session: AsyncSession, username: int) -> User | None:
+async def get_user(session: AsyncSession, username: str) -> User | None:
     """Get a user.
 
     Args:
@@ -114,8 +113,12 @@ def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
+DBSession = typing.Annotated[AsyncSession, Depends(get_session)]
+
+
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)
+    token: typing.Annotated[str, Depends(oauth2_scheme)],
+    session: DBSession,
 ) -> User:
     """Get the current user.
 
@@ -142,26 +145,5 @@ async def get_current_user(
     return user
 
 
+CurrentUser = typing.Annotated[User, Depends(get_current_user)]
 T = TypeVar("T")
-
-
-async def get_or_create(session: AsyncSession, model: type[T], **kwargs: Any) -> T:
-    """Get or create a record.
-
-    Args:
-        session: DB session.
-        model: The model to get/create.
-        kwargs: Args to search for existing records with.
-
-    Returns:
-        The model instance.
-    """
-    stmt = select(model).filter_by(**kwargs)
-    cursor = await session.execute(stmt)
-    instance = cursor.first()
-    if instance:
-        return instance[0]
-    instance = model(**kwargs)
-    session.add(instance)
-    await session.flush()
-    return instance

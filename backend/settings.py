@@ -1,35 +1,33 @@
-from functools import lru_cache
 from typing import Any
 
 from pydantic import BaseSettings, validator
-
 from utils import assemble_mysql_connection
 
 
-class Settings(BaseSettings):
-    DIALECT: str
-    DATABASE: str
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    ASYNC_DRIVER: str
-    DRIVER: str
+class Settings(BaseSettings):  # type: ignore
+    DIALECT: str = ""
+    DATABASE: str = ""
+    DB_USER: str = ""
+    DB_PASSWORD: str = ""
+    DB_HOST: str = ""
+    DB_PORT: int = 0
+    ASYNC_DRIVER: str = ""
+    DRIVER: str = ""
 
-    ASYNC_DB_URL: str | None
-    DB_URL: str | None
+    ASYNC_DB_URL: str | None = ""
+    DB_URL: str | None = ""
 
-    SALT: str
-    SECRET_KEY: str
-    MAX_VERIFY_AGE_SECONDS: int
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    ALGORITHM: str
+    SALT: str = ""
+    SECRET_KEY: str = ""
+    MAX_VERIFY_AGE_SECONDS: int = 0
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 0
+    ALGORITHM: str = ""
 
-    SENDGRID_KEY: str
-    FROM_EMAIL: str
+    SENDGRID_KEY: str = ""
+    FROM_EMAIL: str = ""
 
-    ALLOWED_HOSTS: str
-    HOST: str
+    ALLOWED_HOSTS: str = ""
+    HOST: str = ""
 
     @validator("ASYNC_DB_URL", pre=True)
     def assemble_async_connection_string(

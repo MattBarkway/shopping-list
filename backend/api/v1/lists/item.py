@@ -1,11 +1,9 @@
-from fastapi import Depends, HTTPException, APIRouter
-from sqlalchemy import select, and_, or_
-from sqlalchemy.ext.asyncio import AsyncSession
+from api.payloads import CreatedResponse, CreateItem, ExistingItem, UpdateItem
+from api.utils import CurrentUser, DBSession
+from fastapi import APIRouter, HTTPException
+from models.schema import Collaborator, Item, ShoppingList
+from sqlalchemy import select
 from starlette import status
-
-from api.payloads import ExistingItem, CreateItem, CreatedResponse, UpdateItem
-from api.utils import get_current_user, get_session
-from models.schema import User, Item, ShoppingList, Collaborator
 
 router = APIRouter()
 
@@ -13,8 +11,8 @@ router = APIRouter()
 @router.get("/{sl_id}/items")
 async def get_items(
     sl_id: int,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    user: CurrentUser,
+    session: DBSession,
 ) -> list[ExistingItem]:
     stmt = (
         select(Item)
@@ -46,8 +44,8 @@ async def get_items(
 async def get_item(
     sl_id: int,
     item_id: int,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    user: CurrentUser,
+    session: DBSession,
 ) -> list[ExistingItem]:
     stmt = (
         select(Item)
@@ -78,8 +76,8 @@ async def get_item(
 async def add_item(
     sl_id: int,
     item: CreateItem,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    user: CurrentUser,
+    session: DBSession,
 ) -> CreatedResponse:
     stmt = (
         select(ShoppingList)
@@ -112,11 +110,12 @@ async def update_item(
     sl_id: int,
     item_id: int,
     item: UpdateItem,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
-):
+    user: CurrentUser,
+    session: DBSession,
+) -> None:
     if not any(attr for attr in (item.name, item.quantity, item.description)):
         raise HTTPException(status_code=422, detail="Can't set everything to null")
+
     stmt = (
         select(Item)
         .join(ShoppingList, Item.sl_id == ShoppingList.id)
@@ -131,7 +130,7 @@ async def update_item(
         .where(Item.id == item_id)
     )
     cursor = await session.execute(stmt)
-    item_inst = cursor.scalar()
+    item_inst = cursor.scalar_one()
     if item.name:
         item_inst.name = item.name
     if item.quantity:
@@ -146,17 +145,21 @@ async def update_item(
 async def remove_item(
     sl_id: int,
     item_id: int,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
-):
+    user: CurrentUser,
+    session: DBSession,
+) -> None:
     stmt = (
         select(Item)
-        .join(ShoppingList)
-        .where(
-            (ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id),
-            ShoppingList.id == sl_id,
-            Item.id == item_id,
+        .join(ShoppingList, Item.sl_id == ShoppingList.id)
+        .join(
+            Collaborator,
+            (Collaborator.list_id == ShoppingList.id)
+            & (Collaborator.user_id == user.id),
+            isouter=True,
         )
+        .where((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
+        .where(ShoppingList.id == sl_id)
+        .where(Item.id == item_id)
     )
     cursor = await session.execute(stmt)
     item = cursor.scalar()

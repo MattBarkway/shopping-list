@@ -1,10 +1,7 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.middleware.cors import CORSMiddleware
-
-from api.utils import get_session
 from api.v1.router import router
+from fastapi import FastAPI
 from settings import settings
+from starlette.middleware.cors import CORSMiddleware
 
 
 def create_app():

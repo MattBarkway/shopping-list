@@ -6,12 +6,11 @@ from subprocess import PIPE, Popen
 
 import httpx
 import pytest
+from models.schema import SLBase
+from settings import Settings
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
-
-from models.schema import SLBase
-from settings import Settings
 
 
 @pytest.fixture(scope="session")
@@ -85,7 +84,7 @@ def is_responsive(service: str) -> bool:
     try:
         status = json.loads(output)[0]
         health = status["State"]["Health"]
-    except Exception as e:
+    except Exception:
         return False
     return health["Status"] == "healthy"
 
@@ -98,7 +97,7 @@ def kc_container(docker_ip, docker_services, docker_compose_command):
         try:
             httpx.get(f"http://{docker_ip}:{kc_port}/health/ready")
             return True
-        except Exception as e:
+        except Exception:
             return False
         # print(response)
         # return response.status_code == 200

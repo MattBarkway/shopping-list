@@ -1,24 +1,22 @@
-from fastapi import Depends, APIRouter
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
-
 from api.payloads import (
-    CreateShoppingList,
-    UpdateShoppingList,
     CreatedResponse,
+    CreateShoppingList,
     ExistingShoppingList,
+    UpdateShoppingList,
 )
-from api.utils import get_session, get_current_user
+from api.utils import CurrentUser, DBSession
+from fastapi import APIRouter
 from models.schema import ShoppingList, User
+from sqlalchemy import select
+from starlette import status
 
 router = APIRouter()
 
 
 @router.get("/")
 async def get_shopping_lists(
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    user: CurrentUser,
+    session: DBSession,
 ) -> list[ExistingShoppingList]:
     stmt = select(ShoppingList).join(User).where(User.username == user.username)
     cursor = await session.execute(stmt)
@@ -36,8 +34,8 @@ async def get_shopping_lists(
 @router.get("/{sl_id}")
 async def get_shopping_list(
     sl_id: int,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    user: CurrentUser,
+    session: DBSession,
 ) -> ExistingShoppingList:
     stmt = (
         select(ShoppingList)
@@ -54,11 +52,11 @@ async def get_shopping_list(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_shopping_list(
-    shoppping_list: CreateShoppingList,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    shopping_list: CreateShoppingList,
+    user: CurrentUser,
+    session: DBSession,
 ) -> CreatedResponse:
-    sl_inst = ShoppingList(user_id=user.id, name=shoppping_list.name)
+    sl_inst = ShoppingList(user_id=user.id, name=shopping_list.name)
     session.add(sl_inst)
     await session.commit()
     return CreatedResponse(id=sl_inst.id)
@@ -66,11 +64,11 @@ async def create_shopping_list(
 
 @router.patch("/")
 async def update_shopping_list(
-    shoppping_list: UpdateShoppingList,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    shopping_list: UpdateShoppingList,
+    user: CurrentUser,
+    session: DBSession,
 ) -> None:
-    sl_inst = ShoppingList(user_id=user.id, name=shoppping_list.name)
+    sl_inst = ShoppingList(user_id=user.id, name=shopping_list.name)
     session.add(sl_inst)
     await session.commit()
 
@@ -78,9 +76,9 @@ async def update_shopping_list(
 @router.delete("/{sl_id}")
 async def delete_shopping_list(
     sl_id: int,
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
-):
+    user: CurrentUser,
+    session: DBSession,
+) -> None:
     stmt = (
         select(ShoppingList)
         .join(ShoppingList.owner)

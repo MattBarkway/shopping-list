@@ -1,11 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-
 from api.utils import get_current_user
+from fastapi.testclient import TestClient
 from main import app
-from models.schema import User, ShoppingList, Item, SLBase
+from models.schema import ShoppingList, SLBase, User
 from settings import Settings
+from sqlalchemy import create_engine, select
 
 
 @pytest.mark.integration

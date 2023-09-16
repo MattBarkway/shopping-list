@@ -31,3 +31,11 @@ class UpdateShoppingList(BaseModel):
 
 class ExistingShoppingList(CreateShoppingList, CreatedResponse):
     owner: str
+
+
+class CreateCollaborator(BaseModel):
+    user_id: int
+
+
+class ExistingCollaborator(CreatedResponse, CreateCollaborator):
+    username: str

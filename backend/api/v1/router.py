@@ -1,8 +1,8 @@
 """Defines routing for API endpoints."""
-from fastapi import APIRouter
-
-from api.v1 import auth, collaborator
+from api.v1 import auth
+from api.v1.lists import collaborator
 from api.v1.lists import router as lists
+from fastapi import APIRouter
 
 router = APIRouter()
 
