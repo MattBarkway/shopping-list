@@ -145,3 +145,76 @@ resource "aws_security_group" "backend_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_security_group" "db_sg" {
+  name        = "rds-db-security-group"
+  description = "Security group for the RDS database"
+
+  vpc_id = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+variable "db_password" {
+  description = "The password for the RDS instance"
+}
+
+variable "db_username" {
+  description = "The username for the RDS instance"
+}
+
+resource "aws_db_parameter_group" "db_params" {
+  name        = "db-params"
+  family      = "postgres15"
+  description = "Parameter group for PostgreSQL"
+
+  parameter {
+    name  = "max_connections"
+    value = "20"
+    apply_method = "pending-reboot"
+  }
+}
+
+resource "aws_db_subnet_group" "db_subnet_group" {
+    name       = "postgresubgroup"
+    subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+
+    tags = {
+        Name = "PostgreSQL subnet group"
+    }
+}
+
+resource "aws_db_instance" "sl_db_instance" {
+  identifier                = "sl-db"
+  allocated_storage         = 10
+  storage_type              = "gp2"
+  engine                    = "postgres"
+  engine_version            = "15.3"
+  instance_class            = "db.t3.micro"
+  username                  = var.db_username
+  password                  = var.db_password
+  parameter_group_name      = aws_db_parameter_group.db_params.name
+  db_subnet_group_name      = aws_db_subnet_group.db_subnet_group.name
+  vpc_security_group_ids    = [aws_security_group.db_sg.id]
+  publicly_accessible       = false  // TODO change - figure out how to access
+  backup_retention_period   = 7
+  multi_az                  = false
+  skip_final_snapshot       = true
+
+  tags = {
+    Name = "SLDB"
+  }
+}
+

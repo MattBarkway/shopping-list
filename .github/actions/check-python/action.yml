@@ -1,0 +1,31 @@
+name: 'Python check'
+description: 'Run Python code quality tools.'
+inputs:
+  working-directory:
+    description: 'Directory to run commands from'
+    required: true
+  path:
+    description: 'Path to point to for checks'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - id: ruff
+      if: always()
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: poetry run ruff ${{ inputs.path }}
+
+    - id: Black
+      if: always()
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: poetry run black ${{ inputs.path }} --check --verbose --diff --color
+
+    - id: mypy
+      if: always()
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: poetry run mypy ${{ inputs.path }}

@@ -1,16 +1,18 @@
 """Utilities for the API."""
-import re
+import typing
 from datetime import datetime, timedelta
-from typing import Any, TypeVar
+from typing import TypeVar
 
-from fastapi import Depends, Form, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from models.schema import User
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from settings import settings
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette import status
-
-import exceptions
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  # noqa: S106
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,6 +23,12 @@ CREDENTIALS_EXCEPTION = HTTPException(
     detail="Could not validate credentials",
     headers={"WWW-Authenticate": "Bearer"},
 )
+
+
+async def get_session() -> typing.AsyncGenerator[AsyncSession, None]:
+    engine = create_async_engine(settings.ASYNC_DB_URL, echo=True)
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
 
 
 def hash_pw(password: str) -> str:
@@ -35,39 +43,6 @@ def hash_pw(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def validate_username(username: str) -> int:
-    """Validate a username.
-
-    Args:
-        username: The username to validate.
-
-    Returns:
-        The validated username
-    """
-    try:
-        return int(username)
-    except ValueError:
-        raise exceptions.ValidationError("Username must be an integer value") from None
-
-
-def validate_email(email: str) -> str:
-    """
-    Validate an email.
-
-    Args:
-        email: The email to validate.
-
-    Returns:
-        The validated email.
-    """
-    pattern = re.compile(r"^[a-zA-Z.0-9]+@huboo\.(co|com|co\.uk)$")
-    if not pattern.match(email):
-        raise exceptions.ValidationError(
-            "Invalid email, must be a valid huboo email address."
-        )
-    return email
-
-
 class Token(BaseModel):
     """Token response model.
 
@@ -80,56 +55,42 @@ class Token(BaseModel):
     token_type: str
 
 
-class HubModel(BaseModel):
-    """Hub model.
-
-    Attributes:
-        number: The hub number.
-    """
-
-    number: str
-
-
-async def get_hub(session: AsyncSession, hub_number: int) -> Hub | None:
-    """Get a hub.
+async def get_user(session: AsyncSession, username: str) -> User | None:
+    """Get a user.
 
     Args:
         session: The DB session.
-        hub_number: Hub number.
+        username: Username.
 
     Returns:
-        The Hub object or None.
+        The User object or None.
     """
-    stmt = select(Hub).where(Hub.id == hub_number)
+    stmt = select(User).where(User.username == username)
     cursor = await session.execute(stmt)
     return cursor.scalar()
 
 
-async def authenticate_hub(
-    session: AsyncSession, hub_number: str, password: str
-) -> Hub:
-    """Authenticate a hub.
+async def authenticate_user(
+    session: AsyncSession, username: str, password: str
+) -> User:
+    """Authenticate a user.
 
     Args:
         session: The DB connection.
-        hub_number: Hub number.
+        username: Username.
         password: Password.
 
     Returns:
-        The Hub object.
+        The user object.
     """
-    try:
-        hub_number_int = int(hub_number)
-    except ValueError as ve:
-        raise CREDENTIALS_EXCEPTION from ve
-    hub = await get_hub(session, hub_number_int)
-    if not hub:
+    user = await get_user(session, username)
+    if not user:
         raise CREDENTIALS_EXCEPTION
-    if not pwd_context.verify(password, hub.pw_hash):
+    if not pwd_context.verify(password, user.pw_hash):
         raise CREDENTIALS_EXCEPTION
-    if not hub.verified:
+    if not user.verified:
         raise CREDENTIALS_EXCEPTION
-    return hub
+    return user
 
 
 def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -> str:
@@ -152,17 +113,21 @@ def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-async def get_current_hub(
-    token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(analytics_db)
-) -> Hub:
-    """Get the current hub.
+DBSession = typing.Annotated[AsyncSession, Depends(get_session)]
+
+
+async def get_current_user(
+    token: typing.Annotated[str, Depends(oauth2_scheme)],
+    session: DBSession,
+) -> User:
+    """Get the current user.
 
     Args:
-        token: The hub's token.
+        token: The user's token.
         session: DB session.
 
     Returns:
-        The Hub object.
+        The User object.
     """
     try:
         payload = jwt.decode(
@@ -171,54 +136,14 @@ async def get_current_hub(
     except JWTError as je:
         raise CREDENTIALS_EXCEPTION from je
     try:
-        hub_number = payload["sub"]
+        username = payload["sub"]
     except KeyError as e:
         raise CREDENTIALS_EXCEPTION from e
-    hub = await get_hub(session, hub_number)
-    if hub is None:
+    user = await get_user(session, username)
+    if user is None:
         raise CREDENTIALS_EXCEPTION
-    return hub
+    return user
 
 
+CurrentUser = typing.Annotated[User, Depends(get_current_user)]
 T = TypeVar("T")
-
-
-async def get_or_create(session: AsyncSession, model: type[T], **kwargs: Any) -> T:
-    """Get or create a record.
-
-    Args:
-        session: DB session.
-        model: The model to get/create.
-        kwargs: Args to search for existing records with.
-
-    Returns:
-        The model instance.
-    """
-    stmt = select(model).filter_by(**kwargs)
-    cursor = await session.execute(stmt)
-    instance = cursor.first()
-    if instance:
-        return instance[0]
-    instance = model(**kwargs)
-    session.add(instance)
-    await session.flush()
-    return instance
-
-
-class SentinelOAuth2(OAuth2PasswordRequestForm):
-    """OAuth2 Form data, with an email attribute."""
-
-    def __init__(
-        self,
-        grant_type: str = Form(default=None, regex="password"),
-        username: str = Form(),
-        email: str = Form(),
-        password: str = Form(),
-        scope: str = Form(default=""),
-        client_id: str | None = Form(default=None),
-        client_secret: str | None = Form(default=None),
-    ):
-        super().__init__(
-            grant_type, username, password, scope, client_id, client_secret
-        )
-        self.email = email
