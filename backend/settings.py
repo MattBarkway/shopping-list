@@ -4,7 +4,7 @@ from pydantic import BaseSettings, validator
 from utils import assemble_mysql_connection
 
 
-class Settings(BaseSettings):  # type: ignore
+class Settings(BaseSettings):
     DIALECT: str = ""
     DATABASE: str = ""
     DB_USER: str = ""
