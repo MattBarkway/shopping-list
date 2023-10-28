@@ -10,7 +10,7 @@ from models.schema import User
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from settings import settings
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from starlette import status
 
@@ -28,6 +28,7 @@ CREDENTIALS_EXCEPTION = HTTPException(
 async def get_session() -> typing.AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine(settings.ASYNC_DB_URL, echo=True)
     async with AsyncSession(engine, expire_on_commit=False) as session:
+        await session.execute(text("SELECT * FROM user"))
         yield session
 
 

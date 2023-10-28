@@ -1,32 +1,17 @@
 # Use a Node.js base image
-FROM node:19.8.1-alpine as builder
-
-# Set the working directory in the container
+FROM node:19.8.1-alpine AS builder
 WORKDIR /app
-
-# Copy package.json and yarn.lock files
-COPY package.json yarn.lock ./
-
-# Install dependencies
-RUN yarn install --immutable
-
-# Copy the entire source code
+COPY package*.json .
+RUN npm ci
 COPY . .
+RUN npm run build
+RUN npm prune --production
 
-# Build the Svelte app
-RUN yarn build
-
-# Use a lightweight base image for the final container
-FROM nginx:alpine
-
-# Copy the custom Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy the prerendered HTML file from the build stage to the Nginx directory
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Expose the default HTTP port
-EXPOSE 80
-
-# Start NGINX server
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:19.8.1-alpine
+WORKDIR /app
+COPY --from=builder /app/build build/
+COPY --from=builder /app/node_modules node_modules/
+COPY package.json .
+EXPOSE 3000
+ENV NODE_ENV=production
+CMD [ "node", "build" ]

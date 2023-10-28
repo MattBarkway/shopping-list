@@ -7,18 +7,20 @@ services:
       dockerfile: ../docker/backend.Dockerfile
     ports:
       - "8000:8000"
+    depends_on:
+      - database
   frontend:
     container_name: sl-frontend
     build:
       context: frontend
       dockerfile: ../docker/frontend.Dockerfile
     ports:
-      - "80:80"
+      - "3000:3000"
     depends_on:
       - backend
   database:
     image: postgres
-    container_name: sl-database
+    container_name: sl-shopping-list
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER}

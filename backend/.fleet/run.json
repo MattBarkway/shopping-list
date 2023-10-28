@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "type": "fastapi",
+            "name": "run backend",
+            "module": "main",
+            "application": "app",
+        },
+        {
+            "type": "python-tests",
+            "name": "test backend",
+            "testFramework": "pytest",
+            "targets": [],
+        },
+
+    ]
+}
