@@ -1,4 +1,4 @@
-name: Build and Publish docker images
+name: Lint / Test / Publish
 
 on:
   push:
@@ -23,14 +23,14 @@ jobs:
           working-directory: 'backend'
 
       - name: Check python
-        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+#        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
         uses: ./.github/actions/check-python
         with:
           working-directory: 'backend'
           path: '.'
 
       - name: Check JS
-        if: always() && steps.changes.outputs.js == 'true'
+#        if: always() && steps.changes.outputs.js == 'true'
         uses: ./.github/actions/check-js
         with:
           working-directory: 'frontend'
@@ -50,19 +50,19 @@ jobs:
         with:
           working-directory: 'backend'
 
-      - name: Check python
-        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
-        uses: ./.github/actions/check-python
+      - name: Test python
+#        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+        uses: ./.github/actions/test-python
         with:
           working-directory: 'backend'
           path: '.'
 
-      - name: Check JS
-        if: always() && steps.changes.outputs.js == 'true'
-        uses: ./.github/actions/check-js
-        with:
-          working-directory: 'frontend'
-          path: '.'
+#      - name: Test JS
+#        if: always() && steps.changes.outputs.js == 'true'
+#        uses: ./.github/actions/test-js
+#        with:
+#          working-directory: 'frontend'
+#          path: '.'
 
 
   build-and-publish:
@@ -79,7 +79,7 @@ jobs:
           filters: .github/filters.yaml
 
       - name: Build and Publish backend
-        if: always() && steps.changes.outputs.backend == 'true'
+#        if: always() && steps.changes.outputs.backend == 'true'
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/backend.Dockerfile
@@ -91,7 +91,7 @@ jobs:
           context: backend
 
       - name: Build and Publish frontend
-        if: always() && steps.changes.outputs.frontend == 'true'
+#        if: always() && steps.changes.outputs.frontend == 'true'
         uses: ./.github/actions/publish-image-to-ecr
         with:
           dockerfile: docker/frontend.Dockerfile
