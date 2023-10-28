@@ -11,12 +11,12 @@ fastapi = {extras = ["all"], version = "^0.98.0"}
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
 alembic = "^1.11.1"
-psycopg2-binary = "^2.9.6"
+psycopg2 = {version = "^2.9.7", optional = true}
 asyncpg = "^0.28.0"
 sendgrid = "^6.10.0"
 greenlet = "^2.0.2"
 bcrypt = "^4.0.1"
-
+sqlalchemy = "^2.0.20"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -28,6 +28,7 @@ pytest-env = "^0.8.2"
 pytest-asyncio = "^0.21.1"
 pytest-mock = "^3.11.1"
 pre-commit = "^3.4.0"
+psycopg2-binary = "^2.9.7"
 
 [build-system]
 requires = ["poetry-core"]

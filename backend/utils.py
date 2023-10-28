@@ -8,15 +8,15 @@ def assemble_mysql_connection(
     database: str,
 ) -> str:
     """
-    Create mysql database connection path.
+    Create mysql shopping-list connection path.
 
     Args:
         dialect: SQL dialect.
         driver: SQL driver.
-        username: Username for the database.
-        password: Password for the database.
+        username: Username for the shopping-list.
+        password: Password for the shopping-list.
         address: Database address.
-        port: Port number for database.
+        port: Port number for shopping-list.
         database: Database name.
 
     Returns:

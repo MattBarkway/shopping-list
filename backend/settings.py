@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     ASYNC_DRIVER: str = ""
     DRIVER: str = ""
 
-    ASYNC_DB_URL: str | None = ""
-    DB_URL: str | None = ""
+    ASYNC_DB_URL: str = ""
+    DB_URL: str = ""
 
     SALT: str = ""
     SECRET_KEY: str = ""
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     SENDGRID_KEY: str = ""
     FROM_EMAIL: str = ""
 
-    ALLOWED_HOSTS: str = ""
+    ALLOWED_HOST: str = ""
     HOST: str = ""
 
     @validator("ASYNC_DB_URL", pre=True)

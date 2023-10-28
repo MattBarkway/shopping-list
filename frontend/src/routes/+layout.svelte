@@ -1,16 +1,16 @@
 <script>
     import github from '$lib/images/github.svg';
-    import {Hamburger} from "svelte-hamburgers";
-    import Menu from "./Menu.svelte";
-    import {fly} from 'svelte/transition';
+    import { Hamburger } from "svelte-hamburgers";
+    import Menu from "../components/Menu.svelte";
+    import { fly } from 'svelte/transition';
 
-    let open;
-    let ready;
+    let open = false;
+    let ready = true;
 
 </script>
 
-<Hamburger bind:open --color="#dddddd" class="nav"/>
-<Menu bind:open bind:ready class="nav" style="position: absolute; z-index: 1000;"/>
+<Hamburger bind:open --color="#dddddd"/>
+<Menu bind:open bind:ready/>
 
 <div class="app">
     {#if !open && ready}

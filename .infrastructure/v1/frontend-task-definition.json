@@ -1,0 +1,19 @@
+[
+        {
+            "volumesFrom": [],
+            "portMappings": [
+                {
+                    "hostPort": 5000,
+                    "containerPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "mountPoints": [],
+            "name": "sl-frontend",
+            "environment": [],
+            "image": "796680308813.dkr.ecr.eu-west-1.amazonaws.com/sl-frontend-ecr:latest",
+            "cpu": 256,
+            "memory": 512
+        }
+    ]

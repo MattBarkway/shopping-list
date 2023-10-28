@@ -41,7 +41,7 @@ def database_container(docker_ip, docker_services, app_settings) -> str:
     docker_services.wait_until_responsive(
         timeout=300.0,
         pause=1.0,
-        check=lambda: is_responsive("sl-database"),
+        check=lambda: is_responsive("sl-shopping-list"),
     )
     engine = create_engine(
         app_settings.DB_URL[: -len(app_settings.DATABASE)],
