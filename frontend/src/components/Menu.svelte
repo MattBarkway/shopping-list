@@ -2,11 +2,11 @@
     import {fly, scale} from 'svelte/transition';
     import {quadOut} from 'svelte/easing';
 
-    export let open;
+    export let open =true;
     export let ready = true;
 
-    let status1;
-    let status2;
+    let status1 = true;
+    let status2 = true;
 </script>
 
 {#if open}

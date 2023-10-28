@@ -15,8 +15,8 @@ router = APIRouter()
 
 @router.get("/")
 async def get_shopping_lists(
-    user: CurrentUser,
     session: DBSession,
+    user: CurrentUser,
 ) -> list[ExistingShoppingList]:
     stmt = select(ShoppingList).join(User).where(User.username == user.username)
     cursor = await session.execute(stmt)

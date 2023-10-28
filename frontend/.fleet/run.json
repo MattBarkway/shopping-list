@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "node",
+            "name": "Node.js configuration",
+            "file": "frontend/package.json",
+        },
+
+    ]
+}

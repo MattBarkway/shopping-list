@@ -1,0 +1,19 @@
+[
+        {
+            "volumesFrom": [],
+            "portMappings": [
+                {
+                    "hostPort": 8000,
+                    "containerPort": 8000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "mountPoints": [],
+            "name": "sl-backend",
+            "environment": [],
+            "image": "897486716820.dkr.ecr.us-east-1.amazonaws.com/ee_ecs_spike_repo:latest",
+            "cpu": 256,
+            "memory": 512
+        }
+    ]
