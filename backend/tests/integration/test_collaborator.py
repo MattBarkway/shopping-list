@@ -1,23 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import app
-from settings import Settings
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from src.api.utils import get_current_user
-from src.models.schema import Collaborator, Item, ShoppingList, SLBase, User
+from src.models.schema import Collaborator, Item, ShoppingList, User
 
 
 @pytest.mark.integration
 class TestCollaborators:
     test_client = TestClient(app)
-
-    @pytest.fixture(autouse=True)
-    def create_database_cls(self):
-        engine = create_engine(Settings().DB_URL)
-
-        SLBase.metadata.create_all(engine)
-        yield
-        SLBase.metadata.drop_all(engine)
 
     @pytest.fixture
     def dummy_items(self, db_session, dummy_shopping_list):

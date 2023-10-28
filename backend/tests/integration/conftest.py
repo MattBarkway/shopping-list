@@ -36,9 +36,7 @@ def database_container(docker_ip, docker_services, app_settings) -> str:
     `port_for` takes a container port
     and returns the corresponding host port.
     """
-    port: str = docker_services.port_for(
-        "database", int(os.getenv("POSTGRES_PORT", -1))
-    )
+    port: str = docker_services.port_for("database", int(os.getenv("DB_PORT")))
     database = f"{docker_ip}:{port}"
     docker_services.wait_until_responsive(
         timeout=300.0,
@@ -54,7 +52,7 @@ def database_container(docker_ip, docker_services, app_settings) -> str:
     return database
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def create_database(database_container, app_settings):
     engine = create_engine(app_settings.DB_URL)
 

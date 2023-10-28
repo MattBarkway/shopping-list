@@ -55,7 +55,7 @@ jobs:
         uses: ./.github/actions/test-python
         with:
           working-directory: 'backend'
-          path: '.'
+          path: 'tests/'
 
 #      - name: Test JS
 #        if: always() && steps.changes.outputs.js == 'true'
