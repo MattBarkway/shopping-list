@@ -1,0 +1,103 @@
+name: Build and Publish docker images
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Build Python
+        uses: ./.github/actions/builder
+        with:
+          working-directory: 'backend'
+
+      - name: Check python
+        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+        uses: ./.github/actions/check-python
+        with:
+          working-directory: 'backend'
+          path: '.'
+
+      - name: Check JS
+        if: always() && steps.changes.outputs.js == 'true'
+        uses: ./.github/actions/check-js
+        with:
+          working-directory: 'frontend'
+          path: '.'
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Build Python
+        uses: ./.github/actions/builder
+        with:
+          working-directory: 'backend'
+
+      - name: Check python
+        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+        uses: ./.github/actions/check-python
+        with:
+          working-directory: 'backend'
+          path: '.'
+
+      - name: Check JS
+        if: always() && steps.changes.outputs.js == 'true'
+        uses: ./.github/actions/check-js
+        with:
+          working-directory: 'frontend'
+          path: '.'
+
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Build and Publish backend
+        if: always() && steps.changes.outputs.backend == 'true'
+        uses: ./.github/actions/publish-image-to-ecr
+        with:
+          dockerfile: docker/backend.Dockerfile
+          ecr_registry: ${{ secrets.ECR_BACKEND }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_REGION }}
+          image_name: shopping-list-backend
+          context: backend
+
+      - name: Build and Publish frontend
+        if: always() && steps.changes.outputs.frontend == 'true'
+        uses: ./.github/actions/publish-image-to-ecr
+        with:
+          dockerfile: docker/frontend.Dockerfile
+          ecr_registry: ${{ secrets.ECR_FRONTEND }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_REGION }}
+          image_name: shopping-list-frontend
+          context: frontend
