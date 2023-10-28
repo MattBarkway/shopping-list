@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10.4-slim
 
 WORKDIR /app
 
@@ -10,6 +10,10 @@ COPY poetry.lock pyproject.toml ./
 
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
+
+RUN poetry add psycopg2
+
+RUN poetry lock --no-update
 
 COPY . .
 
