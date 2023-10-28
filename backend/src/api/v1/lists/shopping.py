@@ -1,13 +1,13 @@
-from api.payloads import (
+from fastapi import APIRouter
+from sqlalchemy import select
+from src.api.payloads import (
     CreatedResponse,
     CreateShoppingList,
     ExistingShoppingList,
     UpdateShoppingList,
 )
-from api.utils import CurrentUser, DBSession
-from fastapi import APIRouter
-from models.schema import ShoppingList, User
-from sqlalchemy import select
+from src.api.utils import CurrentUser, DBSession
+from src.models.schema import ShoppingList, User
 from starlette import status
 
 router = APIRouter()

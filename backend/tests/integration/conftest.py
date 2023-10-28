@@ -6,11 +6,11 @@ from subprocess import PIPE, Popen
 
 import httpx
 import pytest
-from models.schema import SLBase
 from settings import Settings
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
+from src.models.schema import SLBase
 
 
 @pytest.fixture(scope="session")

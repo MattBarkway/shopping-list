@@ -1,8 +1,8 @@
-from api.payloads import CreateCollaborator, ExistingCollaborator
-from api.utils import CurrentUser, DBSession
 from fastapi import APIRouter, HTTPException
-from models.schema import Collaborator, ShoppingList, User
 from sqlalchemy import select
+from src.api.payloads import CreateCollaborator, ExistingCollaborator
+from src.api.utils import CurrentUser, DBSession
+from src.models.schema import Collaborator, ShoppingList, User
 from starlette import status
 
 router = APIRouter()

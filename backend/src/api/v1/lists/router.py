@@ -1,5 +1,5 @@
-from api.v1.lists import collaborator, item, shopping
 from fastapi import APIRouter
+from src.api.v1.lists import collaborator, item, shopping
 
 router = APIRouter()
 router.include_router(item.router)

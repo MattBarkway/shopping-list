@@ -6,12 +6,12 @@ from typing import TypeVar
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from models.schema import User
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from settings import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from src.models.schema import User
 from starlette import status
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  # noqa: S106

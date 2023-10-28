@@ -1,10 +1,10 @@
 import pytest
-from api.utils import get_current_user
 from fastapi.testclient import TestClient
 from main import app
-from models.schema import Item, ShoppingList, SLBase, User
 from settings import Settings
 from sqlalchemy import create_engine, select
+from src.api.utils import get_current_user
+from src.models.schema import Item, ShoppingList, SLBase, User
 
 
 @pytest.mark.integration

@@ -3,10 +3,9 @@ from asyncio import Future
 import pytest
 from fastapi.testclient import TestClient
 from itsdangerous import encoding
-from sqlalchemy import select, create_engine
-
 from main import app
-from models.schema import User
+from sqlalchemy import create_engine, select
+from src.models.schema import User
 
 
 @pytest.fixture
@@ -35,7 +34,7 @@ def mock_sendgrid(mocker):
     mock2 = mocker.MagicMock()
     mock.return_value = mock2
     mock2.send.return_value = None
-    mocker.patch("api.v1.auth.SendGridAPIClient", mock)
+    mocker.patch("src.api.v1.auth.SendGridAPIClient", mock)
     return mock2
 
 
@@ -53,7 +52,7 @@ def mock_serializer(mocker, dummy_user):
     mock2 = mocker.MagicMock()
     mock.return_value = mock2
     mock2.loads.return_value = dummy_user.username
-    mocker.patch("api.v1.auth.URLSafeTimedSerializer", mock)
+    mocker.patch("src.api.v1.auth.URLSafeTimedSerializer", mock)
     return mock2
 
 
@@ -63,7 +62,7 @@ def mock_authenticate_user(mocker):
     fut = Future()
     fut.set_result(User(username="foo", pw_hash="foo"))
     mock.return_value = fut
-    mocker.patch("api.v1.auth.authenticate_user", mock)
+    mocker.patch("src.api.v1.auth.authenticate_user", mock)
     return mock
 
 

@@ -3,16 +3,22 @@ import typing
 from datetime import timedelta
 
 import fastapi
-from api.utils import DBSession, Token, authenticate_user, create_access_token, hash_pw
 from exceptions import ValidationError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from itsdangerous import URLSafeTimedSerializer, encoding
-from models.schema import User
 from sendgrid import Mail, SendGridAPIClient
 from settings import settings
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from src.api.utils import (
+    DBSession,
+    Token,
+    authenticate_user,
+    create_access_token,
+    hash_pw,
+)
+from src.models.schema import User
 
 router = fastapi.APIRouter()
 
