@@ -17,10 +17,10 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - uses: actions/setup-python@v4
+      - name: Build Python
+        uses: ./.github/actions/builder
         with:
-          cache: 'poetry'
-          python-version: '3.10'
+          working-directory: 'backend'
 
       - name: Check python
 #        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
@@ -44,10 +44,11 @@ jobs:
         id: changes
         with:
           filters: .github/filters.yaml
-      - uses: actions/setup-python@v4
+
+      - name: Build Python
+        uses: ./.github/actions/builder
         with:
-          cache: 'poetry'
-          python-version: '3.10'
+          working-directory: 'backend'
 
       - name: Test python
 #        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
