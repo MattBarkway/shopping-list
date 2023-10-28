@@ -13,7 +13,3 @@ output "cluster_id" {
 output "ecs_execution_role_arn" {
   value = local.ecs_execution_role_arn
 }
-
-output "security_groups" {
-  value = local.security_groups
-}
