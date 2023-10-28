@@ -12,7 +12,7 @@
             "mountPoints": [],
             "name": "sl-frontend",
             "environment": [],
-            "image": "897486716820.dkr.ecr.us-east-1.amazonaws.com/ee_ecs_spike_repo:latest",
+            "image": "796680308813.dkr.ecr.eu-west-1.amazonaws.com/sl-frontend-ecr:latest",
             "cpu": 256,
             "memory": 512
         }
