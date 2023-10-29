@@ -17,3 +17,7 @@ variable "backend_task_definition_path" {
 variable "frontend_task_definition_path" {
   type = string
 }
+
+variable "name" {
+  type = string
+}

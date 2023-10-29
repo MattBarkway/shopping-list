@@ -1,9 +1,8 @@
 locals {
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
   ecr_backend_repository_name = "${var.name}-backend-ecr"
   ecr_frontend_repository_name = "${var.name}-frontend-ecr"
-  db_security_group = aws_security_group.db_sg.id
-  ecs_execution_role_arn = aws_iam_role.ecs_execution_role.arn
-  cluster_id = aws_ecs_cluster.service_cluster.id
   ecr_policy = <<EOF
 {
     "rules": [
