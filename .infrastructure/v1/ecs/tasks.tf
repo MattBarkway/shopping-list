@@ -5,9 +5,9 @@ resource "aws_security_group" "frontend_sg" {
   vpc_id = var.vpc_id
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -26,9 +26,9 @@ resource "aws_security_group" "backend_sg" {
   vpc_id = var.vpc_id
 
   ingress {
-    from_port   = var.backend_app_port
-    to_port     = var.backend_app_port
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -56,12 +56,12 @@ resource "aws_ecs_service" "frontend_service" {
   }
 
   load_balancer {
-    target_group_arn = var.target_group_arn
+    target_group_arn = var.frontend_target_group_arn
     container_name   = "frontend"
     container_port   = 3000
   }
 
-  depends_on = [local.ecs_execution_role_arn, var.listener]
+  depends_on = [local.ecs_execution_role_arn, var.frontend_listener]
 }
 
 resource "aws_ecs_task_definition" "frontend" {
@@ -91,12 +91,12 @@ resource "aws_ecs_service" "backend_service" {
   }
 
   load_balancer {
-    target_group_arn = var.target_group_arn
+    target_group_arn = var.backend_target_group_arn
     container_name   = "backend"
     container_port   = 8000
   }
 
-  depends_on = [local.ecs_execution_role_arn, var.listener]
+  depends_on = [local.ecs_execution_role_arn, var.backend_listener]
 }
 
 resource "aws_ecs_task_definition" "backend" {

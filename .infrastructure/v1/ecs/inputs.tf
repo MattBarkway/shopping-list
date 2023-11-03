@@ -18,7 +18,11 @@ variable "backend_app_port" {
   type = string
 }
 
-variable "target_group_arn" {
+variable "frontend_target_group_arn" {
+  type = string
+}
+
+variable "backend_target_group_arn" {
   type = string
 }
 
@@ -26,6 +30,10 @@ variable "frontend_app_port" {
   type = string
 }
 
-variable "listener" {
+variable "frontend_listener" {
+  type = string
+}
+
+variable "backend_listener" {
   type = string
 }

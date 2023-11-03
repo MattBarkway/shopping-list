@@ -18,20 +18,27 @@ module "vpc" {
   public_subnets  = local.public_subnets
 
   enable_nat_gateway = true
+  single_nat_gateway = true
   enable_vpn_gateway = true
+
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+  flow_log_max_aggregation_interval    = 60
+
 }
 
 module "ecr" {
   source = "./ecr"
 
-  ecr_backend_repository_name = local.ecr_backend_repository_name
+  ecr_backend_repository_name  = local.ecr_backend_repository_name
   ecr_frontend_repository_name = local.ecr_frontend_repository_name
-  ecr_policy = local.ecr_policy
+  ecr_policy                   = local.ecr_policy
 }
 
 resource aws_security_group "alb_sg" {
-  name        = "alb_sg"
-  vpc_id      = module.vpc.vpc_id
+  name   = "alb_sg"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port        = 0
@@ -69,9 +76,9 @@ module "db" {
   subnet_ids             = module.vpc.public_subnets
   create_db_subnet_group = true
 
-  family = "postgres15"
+  family               = "postgres15"
   major_engine_version = "15.3"
-  deletion_protection = false
+  deletion_protection  = false
 
   parameters = [
     {
@@ -89,8 +96,10 @@ module "ecs" {
   backend_task_definition_path  = var.backend_task_definition_path
   frontend_task_definition_path = var.frontend_task_definition_path
   vpc_id                        = module.vpc.vpc_id
-  target_group_arn     = module.alb.target_group_arn
-  listener              = module.alb.listener
+  frontend_target_group_arn     = module.alb.frontend_target_group_arn
+  backend_target_group_arn      = module.alb.backend_target_group_arn
+  frontend_listener             = module.alb.frontend_listener
+  backend_listener              = module.alb.backend_listener
   backend_app_port              = 8000
   frontend_app_port             = 3000
 }
@@ -98,13 +107,15 @@ module "ecs" {
 module "alb" {
   source = "./alb"
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id              = module.vpc.vpc_id
   alb_security_groups = [aws_security_group.alb_sg.id]
-  alb_subnets = module.vpc.public_subnets
-  frontend_target_id = module.ecs.frontend_target_id
-  backend_target_id = module.ecs.backend_target_id
+  alb_subnets         = module.vpc.public_subnets
+  frontend_target_id  = module.ecs.frontend_target_id
+  backend_target_id   = module.ecs.backend_target_id
 }
 
 
 # TODO
 # look into security groups, is ecs reachable, what ports and shit
+# elastic IP address -> ALB
+# internet gateway -> eIP
