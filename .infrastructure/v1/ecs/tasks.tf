@@ -44,6 +44,7 @@ resource "aws_ecs_service" "frontend_service" {
   name                               = "frontend-service"
   cluster                            = local.cluster_id
   task_definition                    = aws_ecs_task_definition.frontend.arn
+  launch_type                        = "FARGATE"
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
@@ -55,17 +56,18 @@ resource "aws_ecs_service" "frontend_service" {
   }
 
   load_balancer {
-    target_group_arn = var.frontend_target_group_arn
+    target_group_arn = var.target_group_arn
     container_name   = "frontend"
     container_port   = 3000
   }
 
-  depends_on = [local.ecs_execution_role_arn, var.frontend_listener]
+  depends_on = [local.ecs_execution_role_arn, var.listener]
 }
 
 resource "aws_ecs_task_definition" "frontend" {
   family                   = "frontend"
   network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
   execution_role_arn       = local.ecs_execution_role_arn
   cpu                      = "256"
   memory                   = "512"
@@ -77,6 +79,7 @@ resource "aws_ecs_service" "backend_service" {
   name                               = "backend-service"
   cluster                            = local.cluster_id
   task_definition                    = aws_ecs_task_definition.backend.arn
+  launch_type                        = "FARGATE"
   desired_count                      = 1
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
@@ -88,17 +91,18 @@ resource "aws_ecs_service" "backend_service" {
   }
 
   load_balancer {
-    target_group_arn = var.backend_target_group_arn
+    target_group_arn = var.target_group_arn
     container_name   = "backend"
     container_port   = 8000
   }
 
-  depends_on = [local.ecs_execution_role_arn, var.backend_listener]
+  depends_on = [local.ecs_execution_role_arn, var.listener]
 }
 
 resource "aws_ecs_task_definition" "backend" {
   family                   = "backend"
   network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
   execution_role_arn       = local.ecs_execution_role_arn
   cpu                      = "256"
   memory                   = "512"
