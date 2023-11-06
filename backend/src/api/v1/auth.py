@@ -84,9 +84,9 @@ async def register(
     message = Mail(
         from_email=settings.FROM_EMAIL,
         to_emails=form_data.username,
-        subject="Verify your sentinel account",
+        subject="Verify your shopping list account",
         html_content=(
-            f'<a href="{settings.HOST}/v1/auth/validate/{clean_token}/">'
+            f'<a href="{settings.HOST}/api/v1/auth/validate/{clean_token}/">'
             f"click here</a> to verify your account"
         ),
     )
