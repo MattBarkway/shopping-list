@@ -3,7 +3,7 @@ FROM node:19.8.1-alpine AS builder
 WORKDIR /app
 COPY package*.json .
 RUN npm ci
-COPY . .
+COPY ../docker .
 RUN npm run build
 RUN npm prune --production
 
