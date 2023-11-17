@@ -81,29 +81,6 @@ def is_responsive(service: str) -> bool:
     output, err = proc.communicate()
     try:
         status = json.loads(output)[0]
-        health = status["State"]["Health"]
+        return status["State"]["Health"]["Status"] == "healthy"
     except Exception:
         return False
-    return health["Status"] == "healthy"
-
-
-@pytest.fixture(scope="session")
-def kc_container(docker_ip, docker_services, docker_compose_command):
-    kc_port = os.getenv("KEYCLOAK_PORT")
-
-    def kc_healthcheck():
-        try:
-            httpx.get(f"http://{docker_ip}:{kc_port}/health/ready")
-            return True
-        except Exception:
-            return False
-        # print(response)
-        # return response.status_code == 200
-
-    kc = f"{docker_ip}:{kc_port}"
-    docker_services.wait_until_responsive(
-        timeout=300.0,
-        pause=1.0,
-        check=kc_healthcheck,
-    )
-    return kc
