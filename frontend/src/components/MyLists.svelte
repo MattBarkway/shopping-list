@@ -1,9 +1,12 @@
 <script lang="ts">
   import { spring } from "svelte/motion";
-  import ShoppingListItem from "./ShoppingListItem.svelte";
-  import ItemAdder from "./ItemAdder.svelte";
+  import ListSummary from "./ListSummary.svelte";
+  import { goto } from "$app/navigation";
 
   let count = 43;
+  export let lists: string[] = [];
+
+
   const displayed_count = spring();
   $: displayed_count.set(count);
   $: offset = modulo($displayed_count, 1);
@@ -12,16 +15,29 @@
     // handle negative numbers
     return ((n % m) + m) % m;
   }
+
+  async function handleClick(event) {
+    console.log("Clicked!");
+    console.log(event);
+    await goto(`/lists/${event.detail.listID}`);
+  }
+
+  async function handleCreateList() {
+
+  }
 </script>
 
 <div class="shopping-list">
-  <ItemAdder />
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
+  Your Shopping Lists:
+  {#if !!lists}
+    {#each lists as list, i}
+      <ListSummary on:click={handleClick} name="{list['name']}" totalItems="{list['item_count']}"
+                   owner="{list['owner']}" listID="{list['id']}" />
+    {/each}
+  {:else}
+    You don't have any lists
+    <button on:click={handleCreateList}>Create a list</button>
+  {/if}
 
 </div>
 

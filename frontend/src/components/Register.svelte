@@ -6,22 +6,36 @@
   let isLoading = false;
   let error = "";
 
-  async function handleLogin() {
-    isLoading = true;
+  async function login() {
+    // Send a request to your backend server here
+    // You can use the Fetch API or an HTTP library like Axios
     error = "";
-    const data = new URLSearchParams();
-    data.append("username", username);
-    data.append("password", password);
-
-    const response = await fetch('http://localhost:8000/api/v1/auth/token', {
-        method: 'post',
-        body: data,
-    })
-    if (!response.ok) {
-      error = JSON.stringify(await response.json());
+    const formData = new FormData();
+    formData.append("grant_type", "password");
+    if ( !username || !password) {
+      error = "You must provide a username and password!";
+      return;
     }
+    formData.append("username", username);
+    formData.append("password", password);
 
-    isLoading = false;
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/auth/token', {
+        method: 'POST',
+        body: formData, // Send form data
+      });
+
+      if (response.ok) {
+        let data = await response.json()
+        userStore.setAccessToken(data.access_token);
+      } else {
+        if (response.status === 401) {
+          error = "Invalid credentials!"
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 </script>
 

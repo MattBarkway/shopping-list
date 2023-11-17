@@ -1,14 +1,24 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
+
   export let name:string;
-  export let quantity:string;
+  export let totalItems:string;
+  export let owner:string;
+
+  export let listID:number;
+
+
+  const dispatch = createEventDispatcher();
+  function handleClick() {
+    dispatch('click', {listID, owner});
+  }
 
 </script>
 
-<div class="shopping-list-item">
+<div class="shopping-list-item" on:click={handleClick}>
     <div class="item-text">
-      {name} - {quantity}
+      {name} - {totalItems} items - Owned by: {owner}
     </div>
-    <div class="action"> ✏️</div>
     <div class="action"> 🗑️️</div>
 </div>
 

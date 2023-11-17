@@ -1,7 +1,4 @@
-<!-- src/routes/+page.svelte -->
-
 <script>
-    // Add necessary logic for the registration route
 import Register from "../../components/Register.svelte";
 </script>
 
@@ -9,5 +6,4 @@ import Register from "../../components/Register.svelte";
     <title>Register</title>
 </svelte:head>
 
-<!-- Include the Register component here -->
 <Register />

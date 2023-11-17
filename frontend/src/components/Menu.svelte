@@ -7,11 +7,12 @@
 
     let status1 = true;
     let status2 = true;
+    export let menuItems = [];
 </script>
 
 {#if open}
     <div>
-        {#each ['Login 🧍', 'About ❓'] as link, i}
+        {#each menuItems as link, i}
             <p
                     transition:fly={{ y: -15, delay: 15 * i }}
                     on:introstart="{() => {status1 = false; ready = false;}}"
