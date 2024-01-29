@@ -70,6 +70,21 @@ async def get_user(session: AsyncSession, username: str) -> User | None:
     return cursor.scalar()
 
 
+async def get_user_by_id(session: AsyncSession, user_id: int) -> User | None:
+    """Get a user.
+
+    Args:
+        session: The DB session.
+        user_id: User ID.
+
+    Returns:
+        The User object or None.
+    """
+    stmt = select(User).where(User.id == user_id)
+    cursor = await session.execute(stmt)
+    return cursor.scalar()
+
+
 async def authenticate_user(
     session: AsyncSession, username: str, password: str
 ) -> User:
@@ -107,7 +122,7 @@ def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -
     expire = (
         datetime.utcnow() + expires_delta
         if expires_delta
-        else datetime.utcnow() + timedelta(minutes=15)
+        else datetime.utcnow() + timedelta(minutes=180)
     )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -136,10 +151,10 @@ async def get_current_user(
     except JWTError as je:
         raise CREDENTIALS_EXCEPTION from je
     try:
-        username = payload["sub"]
+        user_id = int(payload["sub"])
     except KeyError as e:
         raise CREDENTIALS_EXCEPTION from e
-    user = await get_user(session, username)
+    user = await get_user_by_id(session, user_id)
     if user is None:
         raise CREDENTIALS_EXCEPTION
     return user

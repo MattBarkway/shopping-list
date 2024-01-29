@@ -3,7 +3,6 @@ import typing
 from datetime import timedelta
 
 import fastapi
-from exceptions import ValidationError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from itsdangerous import URLSafeTimedSerializer, encoding
@@ -46,7 +45,7 @@ async def login(
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id},
+        data={"sub": str(user.id)},  # type: ignore
         expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
@@ -75,7 +74,7 @@ async def register(
     try:
         await session.commit()
     except IntegrityError as e:
-        raise ValidationError("User already exists") from e
+        raise HTTPException(422, "User already exists") from e
 
     serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
     token = serializer.dumps(form_data.username, salt=settings.SALT)
@@ -86,7 +85,7 @@ async def register(
         to_emails=form_data.username,
         subject="Verify your shopping list account",
         html_content=(
-            f'<a href="{settings.HOST}/api/v1/auth/validate/{clean_token}/">'
+            f'<a href="{settings.HOST}/api/v1/auth/validate/{clean_token}">'
             f"click here</a> to verify your account"
         ),
     )

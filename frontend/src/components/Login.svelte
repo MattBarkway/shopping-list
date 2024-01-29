@@ -1,73 +1,47 @@
-<script>
-  import { createEventDispatcher } from "svelte";
+<script lang="ts">
+  import List from "./List.svelte";
+  import ListItem from "./ListItem.svelte";
 
-  let username = "";
-  let password = "";
-  let error = "";
-  export let isLoading = false;
-
-  const dispatch = createEventDispatcher();
-
-  async function handleLogin() {
-    dispatch('submit', {
-			username,
-      password,
-		});
-  }
+  export let submitText: string;
 </script>
 
-<main>
-  <h1>Login</h1>
-  <form on:submit={handleLogin}>
-    <label for="username">Username:</label>
-    <input type="text" id="username" bind:value={username} required />
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" bind:value={password} required />
-
-    {#if error}
-      <p class="error">{error}</p>
-    {/if}
-
-    <button type="submit" disabled={isLoading}>
-      {isLoading ? 'Logging in...' : 'Login'}
-    </button>
-  </form>
-</main>
+<form method="POST">
+  <List>
+    <ListItem>
+      <input class="text-box dark" name="email" type="email" placeholder="email">
+    </ListItem>
+    <ListItem>
+      <input class="text-box dark" name="password" type="password" placeholder="password">
+    </ListItem>
+    <button class="dark button">{submitText}</button>
+    <slot />
+  </List>
+</form>
 
 <style>
-  h1 {
-    font-size: 24px;
-    margin-bottom: 16px;
-  }
+    .dark {
+        background: #252525;
+        color: #ffffff;
+    }
 
-  label {
-    display: block;
-    margin-bottom: 8px;
-  }
+    .button {
+        cursor: pointer;
+        padding: 0.5em;
+        border-radius: 0.5em;
+        border: none;
+    }
 
-  input {
-    width: 80%;
-    padding: 8px;
-    margin-bottom: 16px;
-    border: 1px solid #ccc;
-  }
 
-  .error {
-    color: red;
-    margin-top: 8px;
-  }
+    .text-box {
+        margin-left: 1em;
+        width: 90%;
+        /*border: 1px solid rgba(0, 0, 0, 0.1);*/
+        padding: 0.5em;
+        border: none;
+    }
 
-  button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-
-  button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
+    input:focus {
+        outline: none;
+        border: none;
+    }
 </style>
