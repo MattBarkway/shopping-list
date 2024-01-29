@@ -8,11 +8,11 @@ export const actions = {
 		const username = data.get('email');
 		const password = data.get('password');
 		if (username && password) {
-			let response = await login(username.toString(), password.toString());
+			const response = await login(username.toString(), password.toString());
 			if (response.ok) {
-				let payload = await response.json();
+				const payload = await response.json();
 				cookies.set('token', payload['access_token'], { path: '/' });
-				return redirect(302, '/');;
+				return redirect(302, '/');
 			} else if (response.status === 401) {
 				console.log()
 				return { error: 'Invalid credentials, please try again.'};

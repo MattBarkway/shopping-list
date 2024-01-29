@@ -7,7 +7,7 @@
 
   let open = false;
   let ready = true;
-  let menuItems = ['Home 🏠', 'Login 🧍', 'About ❓'];
+  let menuItems = {'Home 🏠': '/', 'Login 🧍': '/login', 'About ❓': '/about'};
 
 </script>
 

@@ -1,18 +1,23 @@
 <script lang="ts">
   import { fly, scale } from "svelte/transition";
   import { quadOut } from "svelte/easing";
-
+  import { goto } from "$app/navigation";
   export let open = true;
   export let ready = true;
 
   let status1 = true;
   let status2 = true;
-  export let menuItems: string[] = [];
+  export let menuItems: { [key: string]: string; } = {};
+
+  async function goToTarget(target: string) {
+    open = false;
+    await goto(target);
+  }
 </script>
 
 {#if open}
   <div>
-    {#each menuItems as link, i}
+    {#each Object.entries(menuItems) as [text, target], i}
       <p
         transition:fly={{ y: -15, delay: 15 * i }}
         on:introstart="{() => {status1 = false; ready = false;}}"
@@ -20,8 +25,9 @@
                         status1 = true;
                         if (status1 && status2) { ready = true}
                     }}"
+        on:click="{() => goToTarget(target)}"
       >
-        {link}
+        {text}
       </p>
     {/each}
   </div>
