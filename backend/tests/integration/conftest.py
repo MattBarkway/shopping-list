@@ -4,7 +4,6 @@ from contextlib import suppress
 from pathlib import Path
 from subprocess import PIPE, Popen
 
-import httpx
 import pytest
 from settings import Settings
 from sqlalchemy import create_engine, text

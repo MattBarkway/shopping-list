@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from settings import settings
+from settings import CurrentSettings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from src.models.schema import User
@@ -25,7 +25,9 @@ CREDENTIALS_EXCEPTION = HTTPException(
 )
 
 
-async def get_session() -> typing.AsyncGenerator[AsyncSession, None]:
+async def get_session(
+    settings: CurrentSettings,
+) -> typing.AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine(settings.ASYNC_DB_URL, echo=True)
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
@@ -108,12 +110,16 @@ async def authenticate_user(
     return user
 
 
-def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -> str:
+def create_access_token(
+    data: JWTData, expires_delta: timedelta | None, secret_key: str, algorithm: str
+) -> str:
     """Create an access token.
 
     Args:
         data: Data payload.
         expires_delta: expiry period.
+        algorithm: Cryptographic algorithm.
+        secret_key: Secret key.
 
     Returns:
         Access token.
@@ -125,13 +131,14 @@ def create_access_token(data: JWTData, expires_delta: timedelta | None = None) -
         else datetime.utcnow() + timedelta(minutes=180)
     )
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(to_encode, secret_key, algorithm=algorithm)
 
 
 DBSession = typing.Annotated[AsyncSession, Depends(get_session)]
 
 
 async def get_current_user(
+    settings: CurrentSettings,
     token: typing.Annotated[str, Depends(oauth2_scheme)],
     session: DBSession,
 ) -> User:

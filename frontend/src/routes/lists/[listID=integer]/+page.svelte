@@ -8,6 +8,8 @@
 
   export let data: PageData;
 
+  $: collaborator = "";
+
   $: isShareModal = false;
 
   async function handleItemEdit(event: any) {
@@ -24,13 +26,23 @@
       method: "DELETE",
       body: JSON.stringify(event.detail)
     });
-    invalidateAll();
+    await invalidateAll();
   }
 
 
   async function openSharingModal(event: any) {
+    console.log(event);
     console.log("opening share modal!");
     isShareModal = true;
+  }
+
+  async function addCollaborator(event: any) {
+    console.log(event);
+    await fetch(`/lists/${$page.params.listID}/collaborator/`, {
+      method: "POST",
+      body: JSON.stringify({ collaborator })
+    });
+    isShareModal = false;
   }
 </script>
 
@@ -39,17 +51,16 @@
 </svelte:head>
 <button on:click={async () => await goto('/')} class="breadcrumb">&lt;- Back to my lists</button>
 <button on:click={openSharingModal} class="breadcrumb">👬Add Collaborator</button>
-<!--TODO add colaborators-->
+<!--TODO add collaborators-->
 {#if isShareModal}
-  <form method="POST">
-    <List>
-      <ListItem>
-        <input class="text-box dark" name="email" type="email" placeholder="email">
-      </ListItem>
-      <button class="dark button">Add</button>
-    </List>
-  </form>
+  <List>
+    <ListItem>
+      <input class="text-box dark" name="email" type="email" placeholder="email" bind:value={collaborator}>
+    </ListItem>
+    <button class="dark button" on:click={addCollaborator}>Add</button>
+  </List>
 {/if}
+<!--TODO: show success/error message-->
 
 <h1> {data.list.name} </h1>
 <ShoppingList
@@ -69,5 +80,6 @@
         padding: 0.3em;
         opacity: 0.5;
         cursor: pointer;
+        margin: 0.2em;
     }
 </style>

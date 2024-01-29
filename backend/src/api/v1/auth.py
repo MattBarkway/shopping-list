@@ -9,7 +9,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from itsdangerous import URLSafeTimedSerializer, encoding
 from sendgrid import Mail, SendGridAPIClient
-from settings import settings
+from settings import CurrentSettings
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from src.api.utils import (
@@ -24,16 +24,19 @@ from src.models.schema import User
 router = fastapi.APIRouter()
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token")
 async def login(
     form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
     session: DBSession,
-) -> dict[str, str]:
+    settings: CurrentSettings,
+) -> typing.Any:
+    # ) -> Token:
     """Login endpoint.
 
     Args:
         form_data: Login form data.
         session: Session with the DB.
+        settings: Settings object.
 
     Returns:
         Token.
@@ -49,8 +52,10 @@ async def login(
     access_token = create_access_token(
         data={"sub": str(user.id)},  # type: ignore
         expires_delta=access_token_expires,
+        secret_key=settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @functools.lru_cache
@@ -59,16 +64,27 @@ def load_template() -> str:
         return f.read()
 
 
+def get_sendgrid_client(
+    settings: CurrentSettings,
+) -> SendGridAPIClient:
+    return SendGridAPIClient(settings.SENDGRID_KEY)
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(
     form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
     register_template: typing.Annotated[str, Depends(load_template)],
+    sendgrid: typing.Annotated[SendGridAPIClient, Depends(get_sendgrid_client)],
+    settings: CurrentSettings,
     session: DBSession,
 ) -> None:
     """Register endpoint.
 
     Args:
         form_data: Login form data.
+        register_template: HTML template to email to new user
+        sendgrid: SendGrid API client.
+        settings: Settings object.
         session: Session with the DB.
 
     Returns:
@@ -88,18 +104,24 @@ async def register(
     serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
     token = serializer.dumps(form_data.username, salt=settings.SALT)
     clean_token = encoding.base64_encode(token).decode()
-    sendgrid = SendGridAPIClient(settings.SENDGRID_KEY)
+
     message = Mail(
         from_email=settings.FROM_EMAIL,
         to_emails=form_data.username,
         subject="Verify your shopping list account",
-        html_content=register_template.format(target=f"{settings.HOST}/api/v1/auth/validate/{clean_token}"),
+        html_content=register_template.format(
+            target=f"{settings.HOST}/api/v1/auth/validate/{clean_token}"
+        ),
     )
     sendgrid.send(message)
 
 
 @router.get("/validate/{token}/", status_code=status.HTTP_200_OK)
-async def validate(token: str, session: DBSession) -> dict[str, str]:
+async def validate(
+    token: str,
+    session: DBSession,
+    settings: CurrentSettings,
+) -> dict[str, str]:
     """Validate endpoint.
 
     Args:

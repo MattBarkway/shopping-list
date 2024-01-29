@@ -21,4 +21,6 @@
 - Handle editing/deleting list items
 - Prevent duplicate list items
 - Add collaborator functionality
+- sign out function
+- better auth approach http only cookies/ localstorage
 -->

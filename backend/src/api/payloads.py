@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class CreatedResponse(BaseModel):
@@ -37,7 +37,17 @@ class ExistingShoppingList(CreateShoppingList, CreatedResponse):
 
 
 class CreateCollaborator(BaseModel):
-    user_id: int
+    user_id: int | None
+    email: str | None
+
+    @validator("user_id", "email", pre=True, always=True)
+    def check_fields(cls, v, values):
+        if "user_id" in values and "email" in values:
+            if v is None and values["email"] is None:
+                raise ValueError(
+                    "Both user_id and email cannot be None at the same time"
+                )
+        return v
 
 
 class ExistingCollaborator(CreatedResponse, CreateCollaborator):
