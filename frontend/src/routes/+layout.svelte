@@ -3,22 +3,11 @@
   import { Hamburger } from "svelte-hamburgers";
   import Menu from "../components/Menu.svelte";
   import { fly } from "svelte/transition";
-  import { onMount } from "svelte";
 
 
   let open = false;
   let ready = true;
-  let authenticated = false;
-  let menuItems = [];
-
-  onMount(() => {
-    // authenticated = isAuthenticated();
-    if (!authenticated) {
-      menuItems = ['Login 🧍', 'About ❓'];
-    } else {
-      menuItems = ['Log out 🧍', 'About ❓'];
-    }
-  });
+  let menuItems = ['Home 🏠', 'Login 🧍', 'About ❓'];
 
 </script>
 

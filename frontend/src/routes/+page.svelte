@@ -1,26 +1,9 @@
-<script>
-  import ShoppingList from "../components/ShoppingList.svelte";
-  import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
-  import { isAuthenticated, logout } from "$lib/auth";
-  import MyLists from "../components/MyLists.svelte";
-  import { getLists } from "$lib/api";
+<script lang="ts">
+  import type { PageData } from "./$types";
+  import WelcomePage from "../components/WelcomePage.svelte";
+  import HomePage from "../components/HomePage.svelte";
 
-  let authenticated = false;
-
-  onMount(() => {
-    authenticated = isAuthenticated();
-    if (!authenticated) {
-      goto("/login");
-    }
-  });
-
-  let listPromise = getLists();
-
-  async function handleLogout() {
-    await logout();
-    await goto("/login");
-  }
+  export let data: PageData;
 </script>
 
 <svelte:head>
@@ -28,20 +11,14 @@
   <meta name="description" content="A collaborative shopping list!" />
 </svelte:head>
 
-<section>
-  {#if authenticated}
-    <button on:click={handleLogout}>Logout</button>
-    {#await listPromise}
-      loading...
-    {:then lists}
-      <MyLists lists="{lists}" />
-    {:catch error}
-      <p style="color: red">{error.message}</p>
-    {/await}
-    <!--    <ShoppingList />-->
-  {/if}
-</section>
+{#if !data.lists}
+  <WelcomePage />
+{:else }
+  <HomePage lists="{data.lists}" />
+{/if}
 
-<style>
-
-</style>
+<!--TODO:
+- Handle editing/deleting list items
+- Prevent duplicate list items
+- Add collaborator functionality
+-->

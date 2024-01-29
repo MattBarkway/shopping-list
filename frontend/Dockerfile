@@ -1,13 +1,13 @@
 # Use a Node.js base image
-FROM node:19.8.1-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json .
 RUN npm ci
-COPY ../docker .
+COPY . .
 RUN npm run build
 RUN npm prune --production
 
-FROM node:19.8.1-alpine
+FROM node:20-alpine
 WORKDIR /app
 COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/

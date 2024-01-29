@@ -1,29 +1,47 @@
 <script lang="ts">
-  import { spring } from "svelte/motion";
   import ShoppingListItem from "./ShoppingListItem.svelte";
   import ItemAdder from "./ItemAdder.svelte";
+  import PlaceholderItem from "./PlaceholderItem.svelte";
+  import { createEventDispatcher } from "svelte";
+  import List from "./List.svelte";
 
-  let count = 43;
-  const displayed_count = spring();
-  $: displayed_count.set(count);
-  $: offset = modulo($displayed_count, 1);
 
-  function modulo(n: number, m: number) {
-    // handle negative numbers
-    return ((n % m) + m) % m;
+  interface Item {
+    name: string,
+    description: string,
+    quantity: number,
   }
+
+  export let items: Item[];
+
+  const dispatch = createEventDispatcher();
+
+  function handleItemEdit(event: any) {
+    console.log("edit item event:", event.detail)
+    dispatch("edit-item", event.detail);
+  }
+
+  function handleItemDelete(event: any) {
+    console.log("delete item event:", event.detail)
+    dispatch("delete-item", event.detail);
+  }
+
 </script>
 
-<div class="shopping-list">
-  <ItemAdder />
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-  <ShoppingListItem name="Carrot" quantity="23"/>
-
-</div>
+<List>
+  <ItemAdder/>
+  {#each items as item, i}
+    <ShoppingListItem
+      id="item-{i}"
+      name="{item.name}"
+      quantity="{item.quantity.toString(10)}"
+      on:edit={handleItemEdit}
+      on:delete={handleItemDelete}
+    />
+  {:else}
+    <PlaceholderItem message="No items yet!"/>
+  {/each}
+</List>
 
 <style>
     * {

@@ -1,31 +1,45 @@
-<script lang="ts" xmlns="http://www.w3.org/1999/html">
+<script>
+  import ListItem from "./ListItem.svelte";
 </script>
 
-<div class="shopping-list-item">
-    <input class="item-input" placeholder="➕ Add an item">
-</div>
+<ListItem>
+  <form method="POST" class="item-input">
+    <input class="text-box dark" name="item" type="text" placeholder="Add an item">
+    <button class="dark no-border button">➕</button>
+  </form>
+</ListItem>
 
 <style>
-    .shopping-list-item {
-        /*display: flex;*/
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-		margin: 1rem 0;
-        background: #252525;
-        border-radius: 1em;
-        color: #a8a8a8;
-	}
-
     .item-input {
-        width: 80%;
+        width: 100%;
         background: #252525;
         border: none;
         height: 100%;
         font-size: 20px;
-        padding: 0.5em;
         margin: 0.5em;
         border-radius: 0.5em;
-        color: white;
     }
 
+    .dark {
+        background: #252525;
+        color: #ffffff;
+    }
+
+    .button {
+        cursor: pointer;
+    }
+
+    .no-border {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .text-box {
+        width: 90%;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.5em;
+    }
+
+    input:focus {
+        outline: none;
+    }
 </style>
