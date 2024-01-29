@@ -26,6 +26,7 @@ async def get_shopping_lists(
             id=shopping_list.id,
             name=shopping_list.name,
             owner=user.username,
+            last_updated=shopping_list.updated_at,
         )
         for shopping_list in lists
     ]
@@ -46,7 +47,7 @@ async def get_shopping_list(
     cursor = await session.execute(stmt)
     shopping_list = cursor.scalar()
     return ExistingShoppingList(
-        id=shopping_list.id, name=shopping_list.name, owner=user.username
+        id=shopping_list.id, name=shopping_list.name, owner=user.username, last_updated=shopping_list.updated_at,
     )
 
 

@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"moment": "^2.30.1",
 		"vite-plugin-env": "^1.0.1"
 	}
 }

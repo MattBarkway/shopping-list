@@ -1,13 +1,17 @@
 <script lang="ts">
   import ListItem from "./ListItem.svelte";
   import List from "./List.svelte";
+  import moment from 'moment';
 
   interface iList {
     id: string,
     name: string,
+    owner: string,
+    last_updated: string,
   }
 
   export let lists: iList[];
+  export let sharedLists: iList[] = [];
 </script>
 
 <List>
@@ -19,6 +23,7 @@
   {#each lists as list}
     <ListItem>
       <a class="text-box" href="lists/{list.id}">{list.name}</a>
+      <span class="text-box narrow darker">Updated {moment(list.last_updated, 'YYYY-MM-DD').fromNow()}</span>
     </ListItem>
   {:else}
     <ListItem>
@@ -30,6 +35,26 @@
   <ListItem><a class="text-box" href="lists/new">create a new list</a></ListItem>
 </List>
 
+<List>
+  <ListItem>
+    <div class="big text-box">
+      👬 Shared with you
+    </div>
+  </ListItem>
+  {#each sharedLists as list}
+    <ListItem>
+      <a class="text-box" href="lists/{list.id}">{list.name}</a>
+      <span class="text-box">owner: {list.owner}</span>
+    </ListItem>
+  {:else}
+    <ListItem>
+      <span class="text-box">
+        Nobody has shared a list with you yet :'(
+      </span>
+    </ListItem>
+  {/each}
+</List>
+
 <style>
     a {
         color: white;
@@ -39,16 +64,12 @@
         font-size: larger;
     }
 
-    .dark {
-        background: #252525;
-        color: #ffffff;
+    .narrow {
+        width: 10%;
     }
 
-    .button {
-        cursor: pointer;
-        padding: 0.5em;
-        border-radius: 0.5em;
-        border: none;
+    .darker {
+        color: #999999;
     }
 
 

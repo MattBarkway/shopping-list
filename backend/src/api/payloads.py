@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel
 
 
@@ -31,6 +33,7 @@ class UpdateShoppingList(BaseModel):
 
 class ExistingShoppingList(CreateShoppingList, CreatedResponse):
     owner: str
+    last_updated: datetime.datetime
 
 
 class CreateCollaborator(BaseModel):

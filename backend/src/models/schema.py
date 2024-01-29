@@ -1,9 +1,23 @@
-from sqlalchemy import ForeignKey, String
+from datetime import datetime
+from typing import ClassVar
+
+from sqlalchemy import ForeignKey, String, JSON, DateTime, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class SLBase(DeclarativeBase):
-    pass
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=func.current_timestamp()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp()
+    )
+
+    def to_dict(self):
+        out = self.__dict__.copy()
+        del out["_sa_instance_state"]
+
+        return out
 
 
 class User(SLBase):

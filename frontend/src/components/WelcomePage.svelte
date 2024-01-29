@@ -23,6 +23,7 @@
     .big {
         font-size: larger;
     }
+
     a {
         color: #a8a8a8;
     }

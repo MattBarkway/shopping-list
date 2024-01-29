@@ -30,9 +30,26 @@ export async function addItem(token: string, listID: string, item: Item) {
 
 export async function getItem(listID: string, itemID: number) {}
 
-export async function removeItem(listID: string, itemID: number) {}
+export async function removeItem(token: string, listID: string, itemID: number) {
+	return await fetch(`${HOST_URL}/api/v1/shopping/${listID}/items/${itemID}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-type': 'application/json',
+			Authorization: `Bearer ${token}`
+		},
+	});
+}
 
-export async function updateItem(listID: string, itemID: number, item: Item) {}
+export async function updateItem(token: string, listID: string, itemID: number, item: Item) {
+	return await fetch(`${HOST_URL}/api/v1/shopping/${listID}/items/${itemID}`, {
+		method: 'PATCH',
+		headers: {
+			'Content-type': 'application/json',
+			Authorization: `Bearer ${token}`
+		},
+		body: JSON.stringify(item)
+	});
+}
 
 //Lists
 export async function getLists(token: string) {

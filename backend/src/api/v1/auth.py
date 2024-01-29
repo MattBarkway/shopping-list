@@ -1,4 +1,6 @@
 """Security helpers."""
+import functools
+import pathlib
 import typing
 from datetime import timedelta
 
@@ -51,9 +53,16 @@ async def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@functools.lru_cache
+def load_template() -> str:
+    with (pathlib.Path("static") / "register.html").open() as f:
+        return f.read()
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(
     form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
+    register_template: typing.Annotated[str, Depends(load_template)],
     session: DBSession,
 ) -> None:
     """Register endpoint.
@@ -84,10 +93,7 @@ async def register(
         from_email=settings.FROM_EMAIL,
         to_emails=form_data.username,
         subject="Verify your shopping list account",
-        html_content=(
-            f'<a href="{settings.HOST}/api/v1/auth/validate/{clean_token}">'
-            f"click here</a> to verify your account"
-        ),
+        html_content=register_template.format(target=f"{settings.HOST}/api/v1/auth/validate/{clean_token}"),
     )
     sendgrid.send(message)
 

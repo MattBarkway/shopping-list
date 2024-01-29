@@ -1,17 +1,20 @@
 import type { Actions } from './$types';
-import { createList, register } from '$lib/server/api';
+import { createList } from '$lib/server/api';
+import { redirect } from "@sveltejs/kit";
 
 export const actions = {
 	default: async ({ cookies, request }) => {
 		const data = await request.formData();
 		const name = data.get('name');
-		let token = cookies.get('token');
+		const token = cookies.get('token');
 		if (name && token) {
-			let response = await createList(token, name.toString());
+			const response = await createList(token, name.toString());
 			if (response.ok) {
-				return { success: true };
+				const data = await response.json()
+				console.log(data);
+				return redirect(302, `/lists/${data.id}`)
 			} else if (response.status === 422) {
-				let err = (await response.json())['detail'];
+				const err = (await response.json())['detail'];
 				console.log(err);
 				return { error: err };
 			} else {

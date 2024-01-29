@@ -3,18 +3,20 @@ import { addItem, getItems, getList } from '$lib/server/api';
 import { type Actions, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
-	let token = cookies.get('token');
+	const token = cookies.get('token');
 	if (!token) {
 		return;
 	}
-	let response = await getList(token, params.listID);
-	let itemResponse = await getItems(token, params.listID);
+	const response = await getList(token, params.listID);
+	const itemResponse = await getItems(token, params.listID);
+	const items = await itemResponse.json()
+	console.log({items});
 	if (response.status === 401) {
 		return redirect(302, '/login');
 	}
 	return {
 		list: await response.json(),
-		items: await itemResponse.json()
+		items: await items,
 	};
 };
 
@@ -22,13 +24,13 @@ export const actions = {
 	default: async ({ params, cookies, request }) => {
 		const data = await request.formData();
 		const item = data.get('item');
-		let token = cookies.get('token');
+		const token = cookies.get('token');
 		if (!params.listID) {
 			redirect(302, '/');
 		}
 
 		if (item && token) {
-			let response = await addItem(token, params.listID, {
+			const response = await addItem(token, params.listID, {
 				name: item.toString(),
 				quantity: 1,
 				description: ''

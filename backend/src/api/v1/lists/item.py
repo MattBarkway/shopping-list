@@ -25,6 +25,7 @@ async def get_items(
         )
         .where((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
         .where(ShoppingList.id == sl_id)
+        .order_by(Item.id)
     )
 
     cursor = await session.execute(stmt)
@@ -79,6 +80,7 @@ async def add_item(
     user: CurrentUser,
     session: DBSession,
 ) -> CreatedResponse:
+    # TODO: optionally prevent duplicate items on a list
     stmt = (
         select(ShoppingList)
         .join(
@@ -137,6 +139,7 @@ async def update_item(
         item_inst.quantity = item.quantity
     if item.description:
         item_inst.description = item.description
+    session.add(item_inst)
 
     await session.commit()
 
