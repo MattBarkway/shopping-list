@@ -51,4 +51,4 @@ class CreateCollaborator(BaseModel):
 
 
 class ExistingCollaborator(CreatedResponse, CreateCollaborator):
-    username: str
+    ...

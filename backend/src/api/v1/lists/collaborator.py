@@ -34,7 +34,7 @@ async def get_collaborators(
     cursor = await session.execute(stmt)
     rows = cursor.all()
     return [
-        ExistingCollaborator(id=collaborator.id, user_id=user.id, username=username)
+        ExistingCollaborator(id=collaborator.id, user_id=user.id, email=username)
         for collaborator, username in rows
     ]
 
@@ -101,7 +101,7 @@ async def validate_collaborator(
     user: CurrentUser,
     session: DBSession,
     settings: CurrentSettings,
-):
+) -> None:
     # TODO frontend flow to create acc/login, then validate
     decoded_token = encoding.base64_decode(token).decode()
     serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
@@ -114,10 +114,10 @@ async def validate_collaborator(
     stmt = select(User).where(User.username == username)
     cursor = await session.execute(stmt)
     expected_user = cursor.scalar()
-    if expected_user != user.username:
+    if expected_user.username != user.username:
         # logged in on wrong account?
         raise HTTPException(403, "Can't accept someone else's invite.")
-    stmt = (
+    stmt2 = (
         select(ShoppingList)
         .where(
             (ShoppingList.id == sl_id)
@@ -125,7 +125,7 @@ async def validate_collaborator(
         )
         .join(Collaborator, ShoppingList.id == Collaborator.list_id, isouter=True)
     )
-    cursor = await session.execute(stmt)
+    cursor = await session.execute(stmt2)
     shopping_list = cursor.scalar()
     if shopping_list:
         collaborator_inst = Collaborator(user_id=expected_user, list_id=sl_id)
