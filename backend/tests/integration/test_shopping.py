@@ -49,7 +49,12 @@ class TestShopping:
             f"{app_url}/api/v1/shopping", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
-        assert response.json() == [
+        response = response.json()
+        cleaned_response = []
+        for i in response:  # TODO just mock the timestamp
+            del i["last_updated"]
+            cleaned_response.append(i)
+        assert cleaned_response == [
             {"id": 1, "name": "sl", "owner": "foo"},
             {"id": 2, "name": "sl2", "owner": "foo"},
         ]
@@ -61,7 +66,9 @@ class TestShopping:
             f"{app_url}/api/v1/shopping/1", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
-        assert response.json() == {
+        payload = response.json()
+        del payload["last_updated"]
+        assert payload == {
             "id": 1,
             "name": "sl",
             "owner": "foo",

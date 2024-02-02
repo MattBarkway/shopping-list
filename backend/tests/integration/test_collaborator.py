@@ -126,7 +126,7 @@ class TestCollaborators:
             headers={"Authorization": "Bearer foo"},
         )
         assert response.status_code == 200
-        assert response.json() == [{"id": 1, "user_id": 1, "username": "bar"}]
+        assert response.json() == [{"id": 1, "user_id": 1, "email": "bar"}]
 
     def test_add_collaborator(
         self, app_url, override_auth, dummy_shopping_list, dummy_user3
