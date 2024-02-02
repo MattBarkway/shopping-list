@@ -17,7 +17,7 @@ runs:
   steps:
     - uses: actions/checkout@v3
     - uses: superfly/flyctl-actions/setup-flyctl@master
-    - run: flyctl deploy --remote-only
+    - run: flyctl deploy
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       env:
