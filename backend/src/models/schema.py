@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import ClassVar
 
-from sqlalchemy import ForeignKey, String, JSON, DateTime, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
