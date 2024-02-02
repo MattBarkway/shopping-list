@@ -1,0 +1,24 @@
+name: Build and Push Docker
+description: yes
+
+inputs:
+  fly-token:
+    description: 'fly.io API token'
+    required: true
+  working-directory:
+    description: 'target dir'
+    required: true
+
+
+
+runs:
+  using: 'composite'
+
+  steps:
+    - uses: actions/checkout@v3
+    - uses: superfly/flyctl-actions/setup-flyctl@master
+    - run: flyctl deploy --remote-only
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      env:
+        FLY_API_TOKEN: ${{ inputs.fly-token }}
