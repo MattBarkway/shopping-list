@@ -28,7 +28,7 @@ CREDENTIALS_EXCEPTION = HTTPException(
 async def get_session(
     settings: CurrentSettings,
 ) -> typing.AsyncGenerator[AsyncSession, None]:
-    engine = create_async_engine(f"{settings.ASYNC_DB_URL}?client_encoding=utf8")
+    engine = create_async_engine(settings.ASYNC_DB_URL)
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
 

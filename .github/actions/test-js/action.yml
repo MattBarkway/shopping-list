@@ -1,0 +1,17 @@
+name: 'JS test'
+description: 'Run Javascript tests.'
+inputs:
+  working-directory:
+    description: 'Directory to run commands from'
+    required: true
+  path:
+    description: 'Path to point to for checks'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - id: placeholder
+      run: echo foo
+      shell: bash
