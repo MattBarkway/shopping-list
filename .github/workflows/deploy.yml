@@ -1,0 +1,39 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: main-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  build-and-publish:
+    strategy:
+      matrix:
+        target: ['backend', 'frontend']
+    runs-on: ubuntu-latest
+    needs: [check]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            target:
+              - ${{ matrix.target }}/**
+
+      - name: Deploy
+        if: always() && steps.changes.outputs.target == 'true'
+        uses: ./.github/actions/fly-deploy
+        with:
+          fly-token: ${{ secrets.FLY_TOKEN }}
+          working-directory: ${{ matrix.target }}

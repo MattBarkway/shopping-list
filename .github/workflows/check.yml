@@ -1,0 +1,64 @@
+name: check
+
+on:
+  push:
+  workflow_call:
+
+concurrency:
+  group: check-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Build Python
+        uses: ./.github/actions/builder
+        with:
+          working-directory: 'backend'
+
+      - name: Check python
+        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+        uses: ./.github/actions/check-python
+        with:
+          working-directory: 'backend'
+
+      - name: Check JS
+        if: always() && steps.changes.outputs.js == 'true'
+        uses: ./.github/actions/check-js
+        with:
+          working-directory: 'frontend'
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Build Python
+        uses: ./.github/actions/builder
+        with:
+          working-directory: 'backend'
+
+      - name: Test python
+        if: always() && (steps.changes.outputs.python == 'true' || steps.changes.outputs.interpreter == 'true')
+        uses: ./.github/actions/test-python
+        with:
+          working-directory: 'backend'
+          path: 'tests/'
+
+      - name: Test JS
+        if: always() && steps.changes.outputs.js == 'true'
+        uses: ./.github/actions/test-js
+        with:
+          working-directory: 'frontend'
+          path: '.'
