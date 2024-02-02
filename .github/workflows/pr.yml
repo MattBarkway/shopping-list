@@ -77,10 +77,12 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: changes
         with:
-          filters: .github/filters.yaml
+          filters: |
+            target:
+              - ${{ matrix.target }}/**
 
-      - name: Deploy ${{ matrix.target }}
-        if: always() && steps.changes.outputs.${{ matrix.target }} == 'true'
+      - name: Deploy
+        if: always() && steps.changes.outputs.target == 'true'
         uses: ./.github/actions/fly-deploy
         with:
           fly-token: ${{ secrets.FLY_TOKEN }}
