@@ -1,45 +1,26 @@
-<script>
-	import ShoppingList from "../components/ShoppingList.svelte";
-	import { isAuthenticated, login, logout } from '../services/auth';
-	import { onMount } from "svelte";
-	import { goto } from "$app/navigation";
+<script lang="ts">
+  import type { PageData } from "./$types";
+  import WelcomePage from "../components/WelcomePage.svelte";
+  import HomePage from "../components/HomePage.svelte";
 
-	let authenticated = false;
-
-	onMount(() => {
-    authenticated = isAuthenticated();
-  });
-
-
-    async function handleLogin() {
-        // Perform login logic here
-        // If login is successful, navigate to another route
-        await goto('/login'); // Example route to navigate to
-    }
-
-    async function handleRegistration() {
-        // Perform registration logic here
-        // If registration is successful, navigate to another route
-        await goto('/register'); // Example route to navigate to
-    }
+  export let data: PageData;
 </script>
 
 <svelte:head>
-	<title>Shopping Basket</title>
-	<meta name="description" content="A collaborative shopping list!" />
+  <title>Shopping Basket</title>
+  <meta name="description" content="A collaborative shopping list!" />
 </svelte:head>
 
-<section>
-	{#if authenticated}
-    <!-- Render content for authenticated users -->
-    <button on:click={handleRegistration}>Logout</button>
-  {:else}
-    <!-- Render content for non-authenticated users -->
-    <button on:click={handleLogin}>Login</button>
-  {/if}
-	<ShoppingList />
-</section>
+{#if !data.lists}
+  <WelcomePage />
+{:else }
+  <HomePage lists="{data.lists}" />
+{/if}
 
-<style>
-
-</style>
+<!--TODO:
+- Handle editing/deleting list items
+- Prevent duplicate list items
+- Add collaborator functionality
+- sign out function
+- better auth approach http only cookies/ localstorage
+-->

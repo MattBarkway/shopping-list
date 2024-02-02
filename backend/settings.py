@@ -1,5 +1,7 @@
+import typing
 from typing import Any
 
+from fastapi import Depends
 from pydantic import BaseSettings, validator
 from utils import assemble_mysql_connection
 
@@ -28,6 +30,7 @@ class Settings(BaseSettings):
 
     ALLOWED_HOST: str = ""
     HOST: str = ""
+    FRONTEND_HOST: str = ""
 
     @validator("ASYNC_DB_URL", pre=True)
     def assemble_async_connection_string(
@@ -81,4 +84,8 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
-settings = Settings()
+def get_settings() -> Settings:
+    return Settings()
+
+
+CurrentSettings = typing.Annotated[Settings, Depends(get_settings)]

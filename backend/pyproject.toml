@@ -50,12 +50,18 @@ addopts = [
     "--asyncio-mode=auto",
 ]
 env = [
+    "DATABASE = sl",
     "DB_USER = postgres",
     "DB_PASSWORD = postgres",
-    "KEYCLOAK_ADMIN = admin",
-    "KEYCLOAK_ADMIN_PASSWORD = password",
-    "POSTGRES_PORT = 5432",
-    "KEYCLOAK_PORT = 8080"
+    "DB_HOST = 0.0.0.0",
+    "DB_PORT = 5432",
+    "ASYNC_DRIVER = asyncpg",
+    "DIALECT = postgresql",
+    "DRIVER = psycopg2",
+    "HOST = 0.0.0.0:8000",
+    "SALT = 1234",
+    "SECRET_KEY = 1234",
+    "ALGORITHM = HS256",
 ]
 
 

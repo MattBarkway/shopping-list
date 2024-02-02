@@ -1,0 +1,40 @@
+# fly.toml app configuration file generated for delicate-dawn-427 on 2023-11-06T20:33:25Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "delicate-dawn-427"
+primary_region = "waw"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
+
+[env]
+  DIALECT="postgresql"
+  DATABASE="postgres"
+  DB_PORT="5432"
+  ASYNC_DRIVER="asyncpg"
+  DRIVER="psycopg2"
+  MAX_VERIFY_AGE_SECONDS="500"
+  ACCESS_TOKEN_EXPIRE_MINUTES="5"
+  ALGORITHM="HS256"
+  ALLOWED_HOST="*"
+
+[build]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20

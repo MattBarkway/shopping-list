@@ -1,33 +1,35 @@
 <script>
-    import github from '$lib/images/github.svg';
-    import { Hamburger } from "svelte-hamburgers";
-    import Menu from "../components/Menu.svelte";
-    import { fly } from 'svelte/transition';
+  import github from "$lib/images/github.svg";
+  import { Hamburger } from "svelte-hamburgers";
+  import Menu from "../components/Menu.svelte";
+  import { fly } from "svelte/transition";
 
-    let open = false;
-    let ready = true;
+
+  let open = false;
+  let ready = true;
+  let menuItems = {'Home 🏠': '/', 'Login 🧍': '/login', 'About ❓': '/about'};
 
 </script>
 
-<Hamburger bind:open --color="#dddddd"/>
-<Menu bind:open bind:ready/>
+<Hamburger bind:open --color="#dddddd" />
+<Menu bind:open bind:ready bind:menuItems />
 
 <div class="app">
-    {#if !open && ready}
-        <div class="fill" transition:fly={{ y: 195 }}>
-            <main>
-                <slot/>
-            </main>
+  {#if !open && ready}
+    <div class="fill" transition:fly={{ y: 195 }}>
+      <main>
+        <slot />
+      </main>
 
-            <footer>
-                <div class="corner">
-                    <a href="https://github.com/mattbarkway">
-                        <img src={github} alt="GitHub"/>
-                    </a>
-                </div>
-            </footer>
+      <footer>
+        <div class="corner">
+          <a href="https://github.com/mattbarkway">
+            <img src={github} alt="GitHub" />
+          </a>
         </div>
-    {/if}
+      </footer>
+    </div>
+  {/if}
 </div>
 
 <style>

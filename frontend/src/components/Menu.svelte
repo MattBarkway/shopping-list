@@ -1,37 +1,44 @@
-<script>
-    import {fly, scale} from 'svelte/transition';
-    import {quadOut} from 'svelte/easing';
+<script lang="ts">
+  import { fly, scale } from "svelte/transition";
+  import { quadOut } from "svelte/easing";
+  import { goto } from "$app/navigation";
+  export let open = true;
+  export let ready = true;
 
-    export let open =true;
-    export let ready = true;
+  let status1 = true;
+  let status2 = true;
+  export let menuItems: { [key: string]: string; } = {};
 
-    let status1 = true;
-    let status2 = true;
+  async function goToTarget(target: string) {
+    open = false;
+    await goto(target);
+  }
 </script>
 
 {#if open}
-    <div>
-        {#each ['Login 🧍', 'About ❓'] as link, i}
-            <p
-                    transition:fly={{ y: -15, delay: 15 * i }}
-                    on:introstart="{() => {status1 = false; ready = false;}}"
-                    on:outroend="{() => {
+  <div>
+    {#each Object.entries(menuItems) as [text, target], i}
+      <p
+        transition:fly={{ y: -15, delay: 15 * i }}
+        on:introstart="{() => {status1 = false; ready = false;}}"
+        on:outroend="{() => {
                         status1 = true;
                         if (status1 && status2) { ready = true}
                     }}"
-            >
-                {link}
-            </p>
-        {/each}
-    </div>
+        on:click="{() => goToTarget(target)}"
+      >
+        {text}
+      </p>
+    {/each}
+  </div>
 
-    <hr transition:scale={{ duration: 200, easing: quadOut, opacity: 1 }}
-        on:outroend="{() => {
+  <hr transition:scale={{ duration: 200, easing: quadOut, opacity: 1 }}
+      on:outroend="{() => {
             status2 = true;
             if (status1 && status2) { ready = true}
         }}"
-        on:introstart="{() => {status2 = false; ready = false;}}"
-    />
+      on:introstart="{() => {status2 = false; ready = false;}}"
+  />
 {/if}
 
 <style>

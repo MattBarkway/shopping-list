@@ -1,13 +1,35 @@
-<!-- src/routes/+page.svelte -->
+<script lang="ts">
+  import type { ActionData } from "./$types";
+  import Login from "../../components/Login.svelte";
 
-<script>
-    // Add necessary logic for the registration route
-import Register from "../../components/Register.svelte";
+  export let form: ActionData;
 </script>
 
 <svelte:head>
-    <title>Register</title>
+  <title>Register</title>
 </svelte:head>
 
-<!-- Include the Register component here -->
-<Register />
+
+<Login submitText="Register">
+  <p>Already have an account?
+    <a class="dark" href="/login">click here</a>
+    to sign in
+  </p>
+  {#if form?.success}
+    <p>Successfully registered! Check your emails to validate your account.</p>
+  {/if}
+  {#if form?.error}
+    <p>Cockup alert: {form?.error}</p>
+  {/if}
+</Login>
+
+<style>
+    a {
+        color: #dcdcdc;
+    }
+
+    .error {
+        color: #ffafaf;
+        font-weight: bold;
+    }
+</style>

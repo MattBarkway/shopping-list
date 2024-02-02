@@ -1,23 +1,14 @@
 import pytest
-from api.utils import get_current_user
 from fastapi.testclient import TestClient
 from main import app
-from models.schema import ShoppingList, SLBase, User
-from settings import Settings
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
+from src.api.utils import get_current_user
+from src.models.schema import ShoppingList, User
 
 
 @pytest.mark.integration
 class TestShopping:
     test_client = TestClient(app)
-
-    @pytest.fixture(autouse=True)
-    def create_database_cls(self):
-        engine = create_engine(Settings().DB_URL)
-
-        SLBase.metadata.create_all(engine)
-        yield
-        SLBase.metadata.drop_all(engine)
 
     @pytest.fixture
     def dummy_shopping_list(self, db_session, dummy_user):
@@ -58,7 +49,12 @@ class TestShopping:
             f"{app_url}/api/v1/shopping", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
-        assert response.json() == [
+        response = response.json()
+        cleaned_response = []
+        for i in response:  # TODO just mock the timestamp
+            del i["last_updated"]
+            cleaned_response.append(i)
+        assert cleaned_response == [
             {"id": 1, "name": "sl", "owner": "foo"},
             {"id": 2, "name": "sl2", "owner": "foo"},
         ]
@@ -70,7 +66,9 @@ class TestShopping:
             f"{app_url}/api/v1/shopping/1", headers={"Authorization": "Bearer foo"}
         )
         assert response.status_code == 200
-        assert response.json() == {
+        payload = response.json()
+        del payload["last_updated"]
+        assert payload == {
             "id": 1,
             "name": "sl",
             "owner": "foo",

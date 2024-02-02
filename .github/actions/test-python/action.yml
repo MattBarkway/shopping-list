@@ -1,0 +1,19 @@
+name: 'Python test'
+description: 'Run Python tests.'
+inputs:
+  working-directory:
+    description: 'Directory to run commands from'
+    required: true
+  path:
+    description: 'Path to point to for checks'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - id: pytest
+      if: always()
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: poetry run pytest ${{ inputs.path }} --integration

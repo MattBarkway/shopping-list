@@ -1,0 +1,8 @@
+.env
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.fleet
+.idea
+.python-version

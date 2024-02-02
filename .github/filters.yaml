@@ -2,3 +2,9 @@ python:
   - '**.py'
 js:
   - '**.js'
+frontend:
+  - 'frontend/**'
+backend:
+  - 'backend/**'
+infrastructure:
+  - '.infrastructure/**'

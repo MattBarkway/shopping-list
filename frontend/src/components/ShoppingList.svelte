@@ -1,45 +1,44 @@
 <script lang="ts">
-	import { spring } from 'svelte/motion';
-    import ShoppingListItem from "./ShoppingListItem.svelte";
-    import ItemAdder from "./ItemAdder.svelte";
+  import ShoppingListItem from "./ShoppingListItem.svelte";
+  import ItemAdder from "./ItemAdder.svelte";
+  import PlaceholderItem from "./PlaceholderItem.svelte";
+  import { createEventDispatcher } from "svelte";
+  import List from "./List.svelte";
 
-    let count = 43;
+  interface Item {
+    id: string,
+    name: string,
+    description: string,
+    quantity: number,
+  }
 
-	const displayed_count = spring();
-	$: displayed_count.set(count);
-	$: offset = modulo($displayed_count, 1);
+  export let items: Item[];
 
-	function modulo(n: number, m: number) {
-		// handle negative numbers
-		return ((n % m) + m) % m;
-	}
+  const dispatch = createEventDispatcher();
+
+  function handleItemEdit(event: any) {
+    console.log("edit item event:", event.detail);
+    dispatch("edit-item", event.detail);
+  }
+
+  function handleItemDelete(event: any) {
+    console.log("delete item event:", event.detail);
+    dispatch("delete-item", event.detail);
+  }
+
 </script>
 
-<div class="shopping-list">
-    <ItemAdder />
-    <ShoppingListItem />
-    <ShoppingListItem />
-    <ShoppingListItem />
-    <ShoppingListItem />
-    <ShoppingListItem />
-    <ShoppingListItem />
-
-</div>
-
-<style>
-    * {
-        font-family: Helvetica, sans-serif;
-    }
-
-	.shopping-list {
-        font-family: Helvetica, sans-serif;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-		margin: 1rem 0;
-        padding: 1rem;
-        background: #444444;
-        border-radius: 1em;
-        opacity: 0.5;
-        color: white;
-	}
-</style>
+<List>
+  <ItemAdder />
+  {#each items as item}
+    <ShoppingListItem
+      id="{item.id}"
+      name="{item.name}"
+      quantity="{item.quantity.toString(10)}"
+      on:edit={handleItemEdit}
+      on:delete={handleItemDelete}
+    />
+  {:else}
+    <PlaceholderItem message="No items yet!" />
+  {/each}
+</List>

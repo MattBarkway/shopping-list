@@ -4,13 +4,12 @@ from contextlib import suppress
 from pathlib import Path
 from subprocess import PIPE, Popen
 
-import httpx
 import pytest
-from models.schema import SLBase
 from settings import Settings
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
+from src.models.schema import SLBase
 
 
 @pytest.fixture(scope="session")
@@ -36,9 +35,7 @@ def database_container(docker_ip, docker_services, app_settings) -> str:
     `port_for` takes a container port
     and returns the corresponding host port.
     """
-    port: str = docker_services.port_for(
-        "shopping-list", int(os.getenv("POSTGRES_PORT", -1))
-    )
+    port: str = docker_services.port_for("database", int(os.getenv("DB_PORT")))
     database = f"{docker_ip}:{port}"
     docker_services.wait_until_responsive(
         timeout=300.0,
@@ -54,7 +51,7 @@ def database_container(docker_ip, docker_services, app_settings) -> str:
     return database
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def create_database(database_container, app_settings):
     engine = create_engine(app_settings.DB_URL)
 
@@ -83,29 +80,6 @@ def is_responsive(service: str) -> bool:
     output, err = proc.communicate()
     try:
         status = json.loads(output)[0]
-        health = status["State"]["Health"]
+        return status["State"]["Health"]["Status"] == "healthy"
     except Exception:
         return False
-    return health["Status"] == "healthy"
-
-
-@pytest.fixture(scope="session")
-def kc_container(docker_ip, docker_services, docker_compose_command):
-    kc_port = os.getenv("KEYCLOAK_PORT")
-
-    def kc_healthcheck():
-        try:
-            httpx.get(f"http://{docker_ip}:{kc_port}/health/ready")
-            return True
-        except Exception:
-            return False
-        # print(response)
-        # return response.status_code == 200
-
-    kc = f"{docker_ip}:{kc_port}"
-    docker_services.wait_until_responsive(
-        timeout=300.0,
-        pause=1.0,
-        check=kc_healthcheck,
-    )
-    return kc
