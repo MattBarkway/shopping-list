@@ -30,8 +30,7 @@ async def login(
     form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
     session: DBSession,
     settings: CurrentSettings,
-) -> typing.Any:
-    # ) -> Token:
+) -> Token:
     """Login endpoint.
 
     Args:
