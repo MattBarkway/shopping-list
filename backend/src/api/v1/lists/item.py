@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from src.api.payloads import CreatedResponse, CreateItem, ExistingItem, UpdateItem

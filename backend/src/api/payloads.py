@@ -1,7 +1,6 @@
 import datetime
-from typing import Any
 
-from pydantic import BaseModel, validator, model_validator
+from pydantic import BaseModel, model_validator
 
 
 class CreatedResponse(BaseModel):
@@ -55,8 +54,7 @@ class CreateCollaborator(BaseModel):
         return data
 
 
-class ExistingCollaborator(CreatedResponse, CreateCollaborator):
-    ...
+class ExistingCollaborator(CreatedResponse, CreateCollaborator): ...
 
 
 class UserInfo(BaseModel):
