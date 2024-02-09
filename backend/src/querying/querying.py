@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.schema import ShoppingList, User, Collaborator, Item
 
 
-async def _get_owned_shopping_list(session: AsyncSession, sl_id: int, user_id: int):
+async def _get_owned_shopping_list(
+    session: AsyncSession, sl_id: int, user_id: int
+) -> Result[tuple[ShoppingList]]:
     stmt = (
         select(ShoppingList)
         .select_from(ShoppingList)
@@ -58,7 +60,7 @@ async def get_item(
     )
 
 
-async def increment_list_updated_ts(session: AsyncSession, sl_id: int):
+async def increment_list_updated_ts(session: AsyncSession, sl_id: int) -> None:
     shopping_list = (
         await session.execute(select(ShoppingList).where(ShoppingList.id == sl_id))
     ).scalar_one()

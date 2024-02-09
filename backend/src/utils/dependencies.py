@@ -8,7 +8,7 @@ from src.querying import querying
 from src.utils import errors
 
 
-async def ensure_owns_list(sl_id: int, session: DBSession, user: CurrentUser):
+async def ensure_owns_list(sl_id: int, session: DBSession, user: CurrentUser) -> User:
     if not (await querying.get_shopping_list(session, sl_id, user.id)).scalar():
         raise HTTPException(
             status_code=404,
@@ -17,7 +17,7 @@ async def ensure_owns_list(sl_id: int, session: DBSession, user: CurrentUser):
     return user
 
 
-async def ensure_owns_list_strict(sl_id: int, session: DBSession, user: CurrentUser):
+async def ensure_owns_list_strict(sl_id: int, session: DBSession, user: CurrentUser) -> User:
     shopping_list = (
         await querying.get_shopping_list(session, sl_id, user.id)
     ).scalar_one()

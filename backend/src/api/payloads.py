@@ -21,7 +21,7 @@ class UpdateItem(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def check_fields(cls, data: Any) -> Any:
+    def check_fields[T](cls, data: dict[str, T]) -> dict[str, T]:  # type: ignore
         if not any(data.get(i) for i in ["name", "description", "quantity"]):
             raise ValueError("name, description and quantity cannot all be empty")
         return data
@@ -49,7 +49,7 @@ class CreateCollaborator(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def check_fields(cls, data: Any):
+    def check_fields[T](cls, data: dict[str, T]) -> dict[str, T]:  # type: ignore
         if not any(data.get(i) for i in ["user_id", "email"]):
             raise ValueError("User and email cannot both be empty")
         return data

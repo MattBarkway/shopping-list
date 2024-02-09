@@ -74,7 +74,7 @@ async def get_user_info(
     Returns:
         UserInfo object.
     """
-    return user
+    return UserInfo(username=user.username)
 
 
 @functools.lru_cache
