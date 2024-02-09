@@ -17,4 +17,22 @@ async def ensure_owns_list(sl_id: int, session: DBSession, user: CurrentUser):
     return user
 
 
+async def ensure_owns_list_strict(sl_id: int, session: DBSession, user: CurrentUser):
+    shopping_list = (
+        await querying.get_shopping_list(session, sl_id, user.id)
+    ).scalar_one()
+    if not shopping_list:
+        raise HTTPException(
+            status_code=404,
+            detail=errors.LIST_NOT_FOUND,
+        )
+    if shopping_list.owner.username != user.username:
+        raise HTTPException(
+            status_code=404,
+            detail=errors.LIST_NOT_FOUND,
+        )
+    return user
+
+
 EnsureOwnsList = typing.Annotated[User, Depends(ensure_owns_list)]
+EnsureOwnsListStrict = typing.Annotated[User, Depends(ensure_owns_list_strict)]

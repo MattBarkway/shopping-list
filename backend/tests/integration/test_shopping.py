@@ -51,7 +51,7 @@ class TestShopping:
         assert response.status_code == 200
         response = response.json()
         cleaned_response = []
-        for i in response:  # TODO just mock the timestamp
+        for i in response:
             del i["last_updated"]
             cleaned_response.append(i)
         assert cleaned_response == [

@@ -8,7 +8,7 @@ from sendgrid import Mail, SendGridAPIClient
 from settings import CurrentSettings
 from sqlalchemy import select
 from src.api.payloads import CreateCollaborator, ExistingCollaborator
-from src.utils.dependencies import EnsureOwnsList
+from src.utils.dependencies import EnsureOwnsList, EnsureOwnsListStrict
 from src.api.utils import DBSession, CurrentUser
 from src.api.v1.auth import get_sendgrid_client
 from src.models.schema import Collaborator, ShoppingList, User
@@ -44,16 +44,14 @@ def get_collaborator_template() -> str:
 async def add_collaborator(
     sl_id: int,
     collaborator: CreateCollaborator,
-    user: EnsureOwnsList,
+    user: EnsureOwnsListStrict,
     session: DBSession,
     settings: CurrentSettings,
     collaborator_template: typing.Annotated[str, Depends(get_collaborator_template)],
     sendgrid: typing.Annotated[SendGridAPIClient, Depends(get_sendgrid_client)],
 ) -> None:
-    # TODO Don't allow collaborators to share a list
     if user.id in list((await querying.get_collaborators(session, sl_id)).scalars()):
         return
-
     if collaborator.user_id:
         collaborator_inst = Collaborator(user_id=collaborator.user_id, list_id=sl_id)
         session.add(collaborator_inst)
@@ -85,7 +83,6 @@ async def validate_collaborator(
     session: DBSession,
     settings: CurrentSettings,
 ) -> None:
-    # TODO frontend flow to create acc/login, then validate
     decoded_token = encoding.base64_decode(token).decode()
     serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
     try:

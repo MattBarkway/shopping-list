@@ -5,12 +5,11 @@ import { redirect } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('token');
 	if (!token) {
-		// TODO can I add a token here?
 		redirect(302, '/login');
 	}
 	const response = await validateCollaborator(token, params.listID, params.token);
 	if (response.status === 401) {
-		// TODO don't use path, use a global store/localstorage
+		// TODO preserve URL target if login required
 		//list-id=${params.listID}&colab-token=${params.token}
 		return redirect(302, '/login');
 	} else if (response.status == 403) {

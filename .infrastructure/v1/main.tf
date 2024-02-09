@@ -115,7 +115,3 @@ module "alb" {
 }
 
 
-# TODO
-# look into security groups, is ecs reachable, what ports and shit
-# elastic IP address -> ALB
-# internet gateway -> eIP
