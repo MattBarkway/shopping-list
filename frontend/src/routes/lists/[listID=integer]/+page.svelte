@@ -13,7 +13,6 @@
   $: isShareModal = false;
 
   async function handleItemEdit(event: any) {
-    console.log("top edit item event:", event.detail);
     await fetch(`/lists/${$page.params.listID}`, {
       method: "POST",
       body: JSON.stringify(event.detail)
@@ -21,7 +20,6 @@
   }
 
   async function handleItemDelete(event: any) {
-    console.log("top delete item event:", event.detail);
     await fetch(`/lists/${$page.params.listID}`, {
       method: "DELETE",
       body: JSON.stringify(event.detail)
@@ -31,13 +29,10 @@
 
 
   async function openSharingModal(event: any) {
-    console.log(event);
-    console.log("opening share modal!");
     isShareModal = true;
   }
 
   async function addCollaborator(event: any) {
-    console.log(event);
     await fetch(`/lists/${$page.params.listID}/collaborator/`, {
       method: "POST",
       body: JSON.stringify({ collaborator })
@@ -50,8 +45,9 @@
   <title>{data.list.name}</title>
 </svelte:head>
 <button on:click={async () => await goto('/')} class="breadcrumb">&lt;- Back to my lists</button>
-<button on:click={openSharingModal} class="breadcrumb">👬Add Collaborator</button>
-<!--TODO add collaborators-->
+{#if data.isOwner}
+  <button on:click={openSharingModal} class="breadcrumb">👬Add Collaborator</button>
+{/if}
 {#if isShareModal}
   <List>
     <ListItem>

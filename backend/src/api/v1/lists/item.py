@@ -1,9 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from src.api.payloads import CreatedResponse, CreateItem, ExistingItem, UpdateItem
-from src.api.utils import CurrentUser, DBSession
+from src.api.utils import DBSession, CurrentUser
 from src.models.schema import Collaborator, Item, ShoppingList
 from starlette import status
+
+from src.querying import querying
+from src.utils import errors
+from src.utils.dependencies import EnsureOwnsList
 
 router = APIRouter()
 
@@ -11,25 +15,12 @@ router = APIRouter()
 @router.get("/{sl_id}/items")
 async def get_items(
     sl_id: int,
-    user: CurrentUser,
+    user: EnsureOwnsList,
     session: DBSession,
 ) -> list[ExistingItem]:
-    stmt = (
-        select(Item)
-        .join(ShoppingList, Item.sl_id == ShoppingList.id)
-        .join(
-            Collaborator,
-            (Collaborator.list_id == ShoppingList.id)
-            & (Collaborator.user_id == user.id),
-            isouter=True,
-        )
-        .where((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
-        .where(ShoppingList.id == sl_id)
-        .order_by(Item.id)
-    )
-
-    cursor = await session.execute(stmt)
-    items = cursor.scalars()
+    if not (await querying.get_shopping_list(session, sl_id, user.id)).scalar():
+        raise HTTPException(404, errors.LIST_NOT_FOUND)
+    items = (await querying.get_items(session, sl_id)).scalars()
     return [
         ExistingItem(
             id=item.id,
@@ -77,33 +68,18 @@ async def get_item(
 async def add_item(
     sl_id: int,
     item: CreateItem,
-    user: CurrentUser,
+    _: EnsureOwnsList,
     session: DBSession,
 ) -> CreatedResponse:
-    # TODO: optionally prevent duplicate items on a list
-    stmt = (
-        select(ShoppingList)
-        .join(
-            Collaborator,
-            (Collaborator.list_id == ShoppingList.id)
-            & (Collaborator.user_id == user.id),
-            isouter=True,
-        )
-        .where(
-            (ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id),
-            ShoppingList.id == sl_id,
-        )
-    )
-    cursor = await session.execute(stmt)
-    shopping_list = cursor.scalar()
     new_item = Item(
         name=item.name,
         quantity=item.quantity,
         description=item.description,
-        sl_id=shopping_list.id,
+        sl_id=sl_id,
     )
     session.add(new_item)
     await session.commit()
+    await querying.increment_list_updated_ts(session, sl_id)
     return CreatedResponse(id=new_item.id)
 
 
@@ -112,27 +88,10 @@ async def update_item(
     sl_id: int,
     item_id: int,
     item: UpdateItem,
-    user: CurrentUser,
+    _: EnsureOwnsList,
     session: DBSession,
 ) -> None:
-    if not any(attr for attr in (item.name, item.quantity, item.description)):
-        raise HTTPException(status_code=422, detail="Can't set everything to null")
-
-    stmt = (
-        select(Item)
-        .join(ShoppingList, Item.sl_id == ShoppingList.id)
-        .join(
-            Collaborator,
-            (Collaborator.list_id == ShoppingList.id)
-            & (Collaborator.user_id == user.id),
-            isouter=True,
-        )
-        .where((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
-        .where(ShoppingList.id == sl_id)
-        .where(Item.id == item_id)
-    )
-    cursor = await session.execute(stmt)
-    item_inst = cursor.scalar_one()
+    item_inst = (await querying.get_item(session, sl_id, item_id)).scalar_one()
     if item.name:
         item_inst.name = item.name
     if item.quantity:
@@ -140,7 +99,7 @@ async def update_item(
     if item.description:
         item_inst.description = item.description
     session.add(item_inst)
-
+    await querying.increment_list_updated_ts(session, sl_id)
     await session.commit()
 
 
@@ -169,3 +128,4 @@ async def remove_item(
 
     await session.delete(item)
     await session.commit()
+    await querying.increment_list_updated_ts(session, sl_id)

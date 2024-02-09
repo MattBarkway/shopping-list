@@ -11,13 +11,11 @@ export const actions = {
 			const response = await login(username.toString(), password.toString());
 			if (response.ok) {
 				const payload = await response.json();
-				cookies.set('token', payload['access_token'], { path: '/' });
+				cookies.set('token', payload['access_token'], { path: '/', secure: true, sameSite: 'strict', maxAge: 60 * 60 * 24});
 				return redirect(302, '/');
 			} else if (response.status === 401) {
-				console.log()
 				return { error: 'Invalid credentials, please try again.'};
 			} else if (response.status === 422) {
-				console.log()
 				return { error: (await response.json())['detail'] };
 			} else {
 				return { error: 'Seems like we might be having issues, please try again later.' };

@@ -17,7 +17,6 @@ export async function getItems(token: string, listID: string) {
 }
 
 export async function addItem(token: string, listID: string, item: Item) {
-  console.log(JSON.stringify(item));
   return await fetch(`${HOST_URL}/api/v1/shopping/${listID}/items`, {
     method: "POST",
     headers: {
@@ -63,7 +62,6 @@ export async function getLists(token: string) {
 }
 
 export async function createList(token: string, name: string) {
-  console.log("body=", JSON.stringify({ name }));
   return await fetch(`${HOST_URL}/api/v1/shopping/`, {
     method: "POST",
     headers: {
@@ -143,6 +141,15 @@ export async function register(username: string, password: string) {
   return await fetch(`${HOST_URL}/api/v1/auth/register`, {
     method: "POST",
     body: formData
+  });
+}
+
+export async function getUser(token: string) {
+  return await fetch(`${HOST_URL}/api/v1/auth/user`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
 }
 

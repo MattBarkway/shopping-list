@@ -50,14 +50,20 @@ class TestShopping:
         )
         assert response.status_code == 200
         response = response.json()
-        cleaned_response = []
-        for i in response:  # TODO just mock the timestamp
+        cleaned_response = {"lists": [], "shared_lists": []}
+        for i in response.get("lists"):
             del i["last_updated"]
-            cleaned_response.append(i)
-        assert cleaned_response == [
-            {"id": 1, "name": "sl", "owner": "foo"},
-            {"id": 2, "name": "sl2", "owner": "foo"},
-        ]
+            cleaned_response["lists"].append(i)
+        for i in response.get("shared_lists"):
+            del i["last_updated"]
+            cleaned_response["shared_lists"].append(i)
+        assert cleaned_response == {
+            "lists": [
+                {"id": 1, "name": "sl", "owner": "foo"},
+                {"id": 2, "name": "sl2", "owner": "foo"},
+            ],
+            "shared_lists": [],
+        }
 
     def test_get_shopping_list(
         self, app_url, override_auth, dummy_shopping_list, dummy_shopping_list2

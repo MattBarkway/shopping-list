@@ -1,4 +1,5 @@
 """Security helpers."""
+
 import functools
 import pathlib
 import typing
@@ -12,12 +13,15 @@ from sendgrid import Mail, SendGridAPIClient
 from settings import CurrentSettings
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+
+from src.api.payloads import UserInfo
 from src.api.utils import (
-    DBSession,
     Token,
     authenticate_user,
     create_access_token,
     hash_pw,
+    DBSession,
+    CurrentUser,
 )
 from src.models.schema import User
 
@@ -29,8 +33,7 @@ async def login(
     form_data: typing.Annotated[OAuth2PasswordRequestForm, Depends()],
     session: DBSession,
     settings: CurrentSettings,
-) -> typing.Any:
-    # ) -> Token:
+) -> Token:
     """Login endpoint.
 
     Args:
@@ -56,6 +59,22 @@ async def login(
         algorithm=settings.ALGORITHM,
     )
     return Token(access_token=access_token, token_type="bearer")
+
+
+@router.get("/user")
+async def get_user_info(
+    user: CurrentUser,
+) -> UserInfo:
+    """Get information about the current user
+
+    Args:
+        user: The active user.
+        session: Session with the DB.
+
+    Returns:
+        UserInfo object.
+    """
+    return UserInfo(username=user.username)
 
 
 @functools.lru_cache

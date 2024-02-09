@@ -1,4 +1,5 @@
 """Defines routing for API endpoints."""
+
 from fastapi import APIRouter
 from src.api.v1 import auth
 from src.api.v1.lists import collaborator

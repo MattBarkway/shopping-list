@@ -1,7 +1,7 @@
 """Utilities for the API."""
+
 import typing
 from datetime import datetime, timedelta
-from typing import TypeVar
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -168,4 +168,3 @@ async def get_current_user(
 
 
 CurrentUser = typing.Annotated[User, Depends(get_current_user)]
-T = TypeVar("T")

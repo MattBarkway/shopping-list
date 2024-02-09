@@ -11,7 +11,6 @@ export const actions = {
 			if (response.ok) {
 				return { success: true };
 			} else if (response.status === 422) {
-				console.log()
 				return { error: (await response.json())['detail'] };
 			} else {
 				return { error: 'Seems like we might be having issues, please try again later.' };
