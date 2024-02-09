@@ -25,7 +25,7 @@
   {/if}
   <footer>
     <div class="corner">
-      <a href="https://github.com/mattbarkway">
+      <a href="https://github.com/mattbarkway/shopping-list" target="_blank">
         <img src={github} alt="GitHub" />
       </a>
     </div>
