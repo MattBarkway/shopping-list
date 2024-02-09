@@ -8,10 +8,14 @@ from sendgrid import Mail, SendGridAPIClient
 from settings import CurrentSettings
 from sqlalchemy import select
 from src.api.payloads import CreateCollaborator, ExistingCollaborator
-from src.api.utils import CurrentUser, DBSession
+from src.utils.dependencies import EnsureOwnsList
+from src.api.utils import DBSession, CurrentUser
 from src.api.v1.auth import get_sendgrid_client
 from src.models.schema import Collaborator, ShoppingList, User
 from starlette import status
+
+from src.querying import querying
+from src.utils import errors
 
 router = APIRouter()
 
@@ -19,23 +23,14 @@ router = APIRouter()
 @router.get("/{sl_id}/collaborators")
 async def get_collaborators(
     sl_id: int,
-    user: CurrentUser,
+    user: EnsureOwnsList,
     session: DBSession,
 ) -> list[ExistingCollaborator]:
-    stmt = (
-        select(Collaborator, User.username)
-        .join(User, Collaborator.user_id == User.id)
-        .where(
-            (Collaborator.list_id == sl_id)
-            & ((Collaborator.user_id == user.id) | (ShoppingList.user_id == user.id))
-        )
-        .join(ShoppingList, ShoppingList.id == sl_id)
-    )
-    cursor = await session.execute(stmt)
-    rows = cursor.all()
     return [
         ExistingCollaborator(id=collaborator.id, user_id=user.id, email=username)
-        for collaborator, username in rows
+        for collaborator, username in (
+            await querying.get_collaborators(session, sl_id)
+        ).all()
     ]
 
 
@@ -55,21 +50,13 @@ async def add_collaborator(
     collaborator_template: typing.Annotated[str, Depends(get_collaborator_template)],
     sendgrid: typing.Annotated[SendGridAPIClient, Depends(get_sendgrid_client)],
 ) -> None:
-    stmt = (
-        select(ShoppingList)
-        .where(
-            (ShoppingList.id == sl_id)
-            & ((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
-        )
-        .join(Collaborator, ShoppingList.id == Collaborator.list_id, isouter=True)
-    )
-    cursor = await session.execute(stmt)
-    shopping_list = cursor.scalar()
-
-    if not shopping_list:
+    if not (await querying.get_shopping_list(session, sl_id, user.id)).scalar():
         raise HTTPException(
-            status_code=403, detail="You don't have access to this list!"
+            status_code=404,
+            detail=errors.LIST_NOT_FOUND,
         )
+    if user.id in list((await querying.get_collaborators(session, sl_id)).scalars()):
+        return
 
     if collaborator.user_id:
         collaborator_inst = Collaborator(user_id=collaborator.user_id, list_id=sl_id)
@@ -110,7 +97,7 @@ async def validate_collaborator(
             decoded_token, salt=settings.SALT, max_age=settings.MAX_VERIFY_AGE_SECONDS
         )
     except SignatureExpired:
-        raise HTTPException(401, "Token has expired")
+        raise HTTPException(401, errors.EXPIRED_TOKEN)
     stmt = select(User).where(User.username == username)
     cursor = await session.execute(stmt)
     expected_user = cursor.scalar()
@@ -128,7 +115,7 @@ async def validate_collaborator(
     cursor = await session.execute(stmt2)
     shopping_list = cursor.scalar()
     if shopping_list:
-        collaborator_inst = Collaborator(user_id=expected_user, list_id=sl_id)
+        collaborator_inst = Collaborator(user_id=expected_user.id, list_id=sl_id)
         session.add(collaborator_inst)
         await session.commit()
 

@@ -1,4 +1,5 @@
 """Security helpers."""
+
 import functools
 import pathlib
 import typing
@@ -13,11 +14,11 @@ from settings import CurrentSettings
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from src.api.utils import (
-    DBSession,
     Token,
     authenticate_user,
     create_access_token,
     hash_pw,
+    DBSession,
 )
 from src.models.schema import User
 

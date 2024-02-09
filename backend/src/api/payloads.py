@@ -1,6 +1,7 @@
 import datetime
+from typing import Any
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, model_validator
 
 
 class CreatedResponse(BaseModel):
@@ -18,9 +19,15 @@ class UpdateItem(BaseModel):
     description: str | None
     quantity: int | None
 
+    @model_validator(mode="before")
+    @classmethod
+    def check_card_number_omitted(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            assert "card_number" not in data, "card_number should not be included"
+        return data
 
-class ExistingItem(CreateItem, CreatedResponse):
-    ...
+
+class ExistingItem(CreateItem, CreatedResponse): ...
 
 
 class CreateShoppingList(BaseModel):
@@ -50,5 +57,4 @@ class CreateCollaborator(BaseModel):
         return v
 
 
-class ExistingCollaborator(CreatedResponse, CreateCollaborator):
-    ...
+class ExistingCollaborator(CreatedResponse, CreateCollaborator): ...

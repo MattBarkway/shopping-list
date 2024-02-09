@@ -6,9 +6,11 @@ from src.api.payloads import (
     ExistingShoppingList,
     UpdateShoppingList,
 )
-from src.api.utils import CurrentUser, DBSession
-from src.models.schema import ShoppingList, User
+from src.api.utils import DBSession, CurrentUser
+from src.models.schema import ShoppingList, User, Collaborator
 from starlette import status
+
+from src.querying import querying
 
 router = APIRouter()
 
@@ -17,19 +19,38 @@ router = APIRouter()
 async def get_shopping_lists(
     session: DBSession,
     user: CurrentUser,
-) -> list[ExistingShoppingList]:
-    stmt = select(ShoppingList).join(User).where(User.username == user.username)
-    cursor = await session.execute(stmt)
-    lists = cursor.scalars()
-    return [
-        ExistingShoppingList(
-            id=shopping_list.id,
-            name=shopping_list.name,
-            owner=user.username,
-            last_updated=shopping_list.updated_at,
-        )
-        for shopping_list in lists
-    ]
+) -> dict[str, list[ExistingShoppingList]]:
+    collaborator_lists = (
+        select(ShoppingList)
+        .join(Collaborator, Collaborator.list_id == ShoppingList.id)
+        .filter(Collaborator.user_id == user.id)
+    )
+    collaborator_cursor = await session.execute(collaborator_lists)
+    collaborator_results = collaborator_cursor.scalars()
+
+    owned_lists = select(ShoppingList).join(User).where(User.username == user.username)
+    owned_cursor = await session.execute(owned_lists)
+    owned_results = owned_cursor.scalars()
+    return {
+        "lists": [
+            ExistingShoppingList(
+                id=shopping_list.id,
+                name=shopping_list.name,
+                owner=user.username,
+                last_updated=shopping_list.updated_at,
+            )
+            for shopping_list in owned_results
+        ],
+        "shared_lists": [
+            ExistingShoppingList(
+                id=shopping_list.id,
+                name=shopping_list.name,
+                owner=user.username,
+                last_updated=shopping_list.updated_at,
+            )
+            for shopping_list in collaborator_results
+        ],
+    }
 
 
 @router.get("/{sl_id}")
@@ -38,14 +59,7 @@ async def get_shopping_list(
     user: CurrentUser,
     session: DBSession,
 ) -> ExistingShoppingList:
-    stmt = (
-        select(ShoppingList)
-        .join(User)
-        .where(User.username == user.username)
-        .where(ShoppingList.id == sl_id)
-    )
-    cursor = await session.execute(stmt)
-    shopping_list = cursor.scalar()
+    shopping_list = (await querying.get_shopping_list(session, sl_id, user.id)).scalar()
     return ExistingShoppingList(
         id=shopping_list.id,
         name=shopping_list.name,
