@@ -7,7 +7,7 @@
 
   let open = false;
   let ready = true;
-  let menuItems = {'Home 🏠': '/', 'Login 🧍': '/login', 'About ❓': '/about'};
+  let menuItems = { "Home 🏠": "/", "Login 🧍": "/login", "About ❓": "/about" };
 
 </script>
 
@@ -20,25 +20,24 @@
       <main>
         <slot />
       </main>
-
-      <footer>
-        <div class="corner">
-          <a href="https://github.com/mattbarkway">
-            <img src={github} alt="GitHub" />
-          </a>
-        </div>
-      </footer>
     </div>
   {/if}
+  <footer>
+    <div class="corner">
+      <a href="https://github.com/mattbarkway">
+        <img src={github} alt="GitHub" />
+      </a>
+    </div>
+  </footer>
 </div>
 
 <style>
     .fill {
         width: 100%;
-        height: 100%;
+        /*height: 90%;*/
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
+        /*min-height: 100vh;*/
     }
 
     .app {
@@ -61,11 +60,19 @@
     footer {
         display: flex;
         justify-content: space-between;
+        position: relative;
     }
 
     .corner {
+        border: solid rgb(0, 0, 0, 0) 3px;
+        border-top: white;
+        border-radius: 2em;
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
         width: 3em;
         height: 3em;
+        transition: border-radius 0.5s, border-color 0.5s;
     }
 
     .corner a {
@@ -76,9 +83,22 @@
         height: 100%;
     }
 
-    .corner img {
-        width: 2em;
-        height: 2em;
+    .corner:hover {
+        animation: spinBorder 2s;
+    }
+
+    @keyframes spinBorder {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .corner:hover {
+        border-color: black;
+        border-radius: 2em;
         object-fit: contain;
     }
 </style>
