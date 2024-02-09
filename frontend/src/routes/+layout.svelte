@@ -1,13 +1,14 @@
-<script>
+<script lang="ts">
   import github from "$lib/images/github.svg";
   import { Hamburger } from "svelte-hamburgers";
   import Menu from "../components/Menu.svelte";
+  import type { LayoutData } from './$types';
   import { fly } from "svelte/transition";
 
-
+  export let data: LayoutData;
   let open = false;
   let ready = true;
-  let menuItems = { "Home 🏠": "/", "Login 🧍": "/login", "About ❓": "/about" };
+  $: menuItems = data.signed_in ?  { "Home 🏠": "/", "Logout 🚶": "/logout", "About ❓": "/about" }: { "Home 🏠": "/", "Login 🧍": "/login", "About ❓": "/about" };
 
 </script>
 

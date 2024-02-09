@@ -17,12 +17,10 @@
   const dispatch = createEventDispatcher();
 
   function handleItemEdit(event: any) {
-    console.log("edit item event:", event.detail);
     dispatch("edit-item", event.detail);
   }
 
   function handleItemDelete(event: any) {
-    console.log("delete item event:", event.detail);
     dispatch("delete-item", event.detail);
   }
 
