@@ -13,12 +13,15 @@ from sendgrid import Mail, SendGridAPIClient
 from settings import CurrentSettings
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+
+from src.api.payloads import UserInfo
 from src.api.utils import (
     Token,
     authenticate_user,
     create_access_token,
     hash_pw,
     DBSession,
+    CurrentUser,
 )
 from src.models.schema import User
 
@@ -56,6 +59,22 @@ async def login(
         algorithm=settings.ALGORITHM,
     )
     return Token(access_token=access_token, token_type="bearer")
+
+
+@router.get("/user")
+async def get_user_info(
+    user: CurrentUser,
+) -> UserInfo:
+    """Get information about the current user
+
+    Args:
+        user: The active user.
+        session: Session with the DB.
+
+    Returns:
+        UserInfo object.
+    """
+    return user
 
 
 @functools.lru_cache

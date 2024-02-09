@@ -73,7 +73,6 @@
         left: 10px;
         width: 3em;
         height: 3em;
-        transition: border-radius 0.5s, border-color 0.5s;
     }
 
     .corner a {
@@ -85,21 +84,15 @@
     }
 
     .corner:hover {
-        animation: spinBorder 2s;
+        animation: spin 1s;
     }
 
-    @keyframes spinBorder {
+    @keyframes spin {
         0% {
             transform: rotate(0deg);
         }
         100% {
             transform: rotate(360deg);
         }
-    }
-
-    .corner:hover {
-        border-color: black;
-        border-radius: 2em;
-        object-fit: contain;
     }
 </style>

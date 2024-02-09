@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from src.api.payloads import CreatedResponse, CreateItem, ExistingItem, UpdateItem
@@ -79,6 +81,7 @@ async def add_item(
     )
     session.add(new_item)
     await session.commit()
+    await querying.increment_list_updated_ts(session, sl_id)
     return CreatedResponse(id=new_item.id)
 
 
@@ -90,7 +93,6 @@ async def update_item(
     _: EnsureOwnsList,
     session: DBSession,
 ) -> None:
-
     item_inst = (await querying.get_item(session, sl_id, item_id)).scalar_one()
     if item.name:
         item_inst.name = item.name
@@ -99,7 +101,7 @@ async def update_item(
     if item.description:
         item_inst.description = item.description
     session.add(item_inst)
-
+    await querying.increment_list_updated_ts(session, sl_id)
     await session.commit()
 
 
@@ -128,3 +130,4 @@ async def remove_item(
 
     await session.delete(item)
     await session.commit()
+    await querying.increment_list_updated_ts(session, sl_id)

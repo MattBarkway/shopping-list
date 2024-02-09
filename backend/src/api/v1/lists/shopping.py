@@ -45,7 +45,7 @@ async def get_shopping_lists(
             ExistingShoppingList(
                 id=shopping_list.id,
                 name=shopping_list.name,
-                owner=user.username,
+                owner=shopping_list.owner.username,
                 last_updated=shopping_list.updated_at,
             )
             for shopping_list in collaborator_results
@@ -63,7 +63,7 @@ async def get_shopping_list(
     return ExistingShoppingList(
         id=shopping_list.id,
         name=shopping_list.name,
-        owner=user.username,
+        owner=shopping_list.owner.username,
         last_updated=shopping_list.updated_at,
     )
 

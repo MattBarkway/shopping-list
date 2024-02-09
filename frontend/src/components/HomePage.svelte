@@ -23,7 +23,7 @@
   {#each lists as list}
     <ListItem>
       <a class="text-box" href="lists/{list.id}">{list.name}</a>
-      <span class="text-box narrow darker">Updated {moment(list.last_updated, 'YYYY-MM-DD').fromNow()}</span>
+      <span class="text-box narrow darker">Updated {moment(list.last_updated).fromNow()}</span>
     </ListItem>
   {:else}
     <ListItem>
@@ -45,6 +45,7 @@
     <ListItem>
       <a class="text-box" href="lists/{list.id}">{list.name}</a>
       <span class="text-box">owner: {list.owner}</span>
+      <span class="text-box darker">Updated {moment(list.last_updated).fromNow()}</span>
     </ListItem>
   {:else}
     <ListItem>

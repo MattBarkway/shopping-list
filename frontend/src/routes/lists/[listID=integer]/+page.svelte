@@ -45,8 +45,9 @@
   <title>{data.list.name}</title>
 </svelte:head>
 <button on:click={async () => await goto('/')} class="breadcrumb">&lt;- Back to my lists</button>
-<button on:click={openSharingModal} class="breadcrumb">👬Add Collaborator</button>
-<!--TODO add collaborators-->
+{#if data.isOwner}
+  <button on:click={openSharingModal} class="breadcrumb">👬Add Collaborator</button>
+{/if}
 {#if isShareModal}
   <List>
     <ListItem>

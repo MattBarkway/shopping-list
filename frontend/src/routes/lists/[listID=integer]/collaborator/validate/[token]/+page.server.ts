@@ -16,5 +16,5 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	} else if (response.status == 403) {
 		return { error: 'Forbidden (are you signed in to the wrong account?)' };
 	}
-	return { success: true };
+	return redirect(302, `/lists/${params.listID}`);
 };

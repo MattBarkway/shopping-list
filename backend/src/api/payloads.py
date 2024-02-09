@@ -15,15 +15,15 @@ class CreateItem(BaseModel):
 
 
 class UpdateItem(BaseModel):
-    name: str | None
-    description: str | None
-    quantity: int | None
+    name: str | None = None
+    description: str | None = None
+    quantity: int | None = None
 
     @model_validator(mode="before")
     @classmethod
-    def check_card_number_omitted(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            assert "card_number" not in data, "card_number should not be included"
+    def check_fields(cls, data: Any) -> Any:
+        if not any(data.get(i) for i in ["name", "description", "quantity"]):
+            raise ValueError("name, description and quantity cannot all be empty")
         return data
 
 
@@ -44,17 +44,20 @@ class ExistingShoppingList(CreateShoppingList, CreatedResponse):
 
 
 class CreateCollaborator(BaseModel):
-    user_id: int | None
-    email: str | None
+    user_id: int | None = None
+    email: str | None = None
 
-    @validator("user_id", "email", pre=True, always=True)
-    def check_fields(cls, v, values):
-        if "user_id" in values and "email" in values:
-            if v is None and values["email"] is None:
-                raise ValueError(
-                    "Both user_id and email cannot be None at the same time"
-                )
-        return v
+    @model_validator(mode="before")
+    @classmethod
+    def check_fields(cls, data: Any):
+        if not any(data.get(i) for i in ["user_id", "email"]):
+            raise ValueError("User and email cannot both be empty")
+        return data
 
 
-class ExistingCollaborator(CreatedResponse, CreateCollaborator): ...
+class ExistingCollaborator(CreatedResponse, CreateCollaborator):
+    ...
+
+
+class UserInfo(BaseModel):
+    username: str

@@ -9,7 +9,6 @@ export const POST: RequestHandler = async ({ params, cookies, request }) => {
 	}
 	const payload = await request.json();
 	const response = await addCollaborator(token, params.listID, payload.collaborator);
-	let gub = await response.json()
 	if (response.status === 401) {
 		return redirect(302, '/login');
 	}

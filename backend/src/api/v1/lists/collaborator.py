@@ -44,17 +44,13 @@ def get_collaborator_template() -> str:
 async def add_collaborator(
     sl_id: int,
     collaborator: CreateCollaborator,
-    user: CurrentUser,
+    user: EnsureOwnsList,
     session: DBSession,
     settings: CurrentSettings,
     collaborator_template: typing.Annotated[str, Depends(get_collaborator_template)],
     sendgrid: typing.Annotated[SendGridAPIClient, Depends(get_sendgrid_client)],
 ) -> None:
-    if not (await querying.get_shopping_list(session, sl_id, user.id)).scalar():
-        raise HTTPException(
-            status_code=404,
-            detail=errors.LIST_NOT_FOUND,
-        )
+    # TODO Don't allow collaborators to share a list
     if user.id in list((await querying.get_collaborators(session, sl_id)).scalars()):
         return
 
@@ -102,22 +98,15 @@ async def validate_collaborator(
     cursor = await session.execute(stmt)
     expected_user = cursor.scalar()
     if expected_user.username != user.username:
-        # logged in on wrong account?
         raise HTTPException(403, "Can't accept someone else's invite.")
-    stmt2 = (
-        select(ShoppingList)
-        .where(
-            (ShoppingList.id == sl_id)
-            & ((ShoppingList.user_id == user.id) | (Collaborator.user_id == user.id))
-        )
-        .join(Collaborator, ShoppingList.id == Collaborator.list_id, isouter=True)
-    )
+    stmt2 = select(ShoppingList).where(ShoppingList.id == sl_id)
     cursor = await session.execute(stmt2)
     shopping_list = cursor.scalar()
     if shopping_list:
         collaborator_inst = Collaborator(user_id=expected_user.id, list_id=sl_id)
         session.add(collaborator_inst)
         await session.commit()
+    raise HTTPException(404, errors.LIST_NOT_FOUND)
 
 
 @router.delete("/{sl_id}/collaborators/{collaborator_id}")

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select, Result, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,3 +56,11 @@ async def get_item(
     return await session.execute(
         select(Item).where((Item.sl_id == sl_id) & (Item.id == item_id))
     )
+
+
+async def increment_list_updated_ts(session: AsyncSession, sl_id: int):
+    shopping_list = (
+        await session.execute(select(ShoppingList).where(ShoppingList.id == sl_id))
+    ).scalar_one()
+    shopping_list.updated_at = datetime.now()
+    await session.commit()

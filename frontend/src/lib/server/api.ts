@@ -144,5 +144,14 @@ export async function register(username: string, password: string) {
   });
 }
 
+export async function getUser(token: string) {
+  return await fetch(`${HOST_URL}/api/v1/auth/user`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
 
 // TODO duplicated collaborator APIs in backend?
