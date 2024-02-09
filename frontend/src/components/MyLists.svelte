@@ -17,8 +17,6 @@
   }
 
   async function handleClick(event) {
-    console.log("Clicked!");
-    console.log(event);
     await goto(`/lists/${event.detail.listID}`);
   }
 
