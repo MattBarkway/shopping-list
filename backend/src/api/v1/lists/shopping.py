@@ -19,20 +19,18 @@ router = APIRouter()
 
 @router.get("/")
 async def get_shopping_lists(
-    owned_session: DBSession,
-    shared_session: DBSession,
+    session: DBSession,
     user: CurrentUser,
 ) -> dict[str, list[ExistingShoppingList]]:
-    collaborator_lists = (
+    collaborator_stmt = (
         select(ShoppingList)
         .join(Collaborator, Collaborator.list_id == ShoppingList.id)
         .filter(Collaborator.user_id == user.id)
     )
-    collaborator_cursor_task = asyncio.create_task(shared_session.execute(collaborator_lists))
+    collaborator_cursor = await session.execute(collaborator_stmt)
 
-    owned_lists = select(ShoppingList).join(User).where(User.username == user.username)
-    owned_cursor = await asyncio.create_task(owned_session.execute(owned_lists))
-    collaborator_cursor = await collaborator_cursor_task
+    owned_stmt = select(ShoppingList).join(User).where(User.username == user.username)
+    owned_cursor = await session.execute(owned_stmt)
     return {
         "lists": [
             ExistingShoppingList(
@@ -61,7 +59,9 @@ async def get_shopping_list(
     user: CurrentUser,
     session: DBSession,
 ) -> ExistingShoppingList:
-    shopping_list = (await querying.get_shopping_list(session, sl_id, user.id)).scalar_one()
+    shopping_list = (
+        await querying.get_shopping_list(session, sl_id, user.id)
+    ).scalar_one()
     return ExistingShoppingList(
         id=shopping_list.id,
         name=shopping_list.name,
