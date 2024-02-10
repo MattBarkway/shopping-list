@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     SENDGRID_KEY: str = ""
     FROM_EMAIL: str = ""
 
+    SENTRY_DSN: str = ""
+
     ALLOWED_HOST: str = ""
     HOST: str = ""
     FRONTEND_HOST: str = ""
