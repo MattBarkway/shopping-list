@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 from sqlalchemy import select
 from src.api.payloads import (
