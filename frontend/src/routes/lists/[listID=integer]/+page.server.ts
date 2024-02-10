@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { addItem, getItems, getList } from '$lib/server/api';
+import { addItem, getItems, getList, getUser } from "$lib/server/api";
 import { type Actions, redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ locals, params, cookies }) => {
+export const load: PageServerLoad = async ({ params, cookies }) => {
 	const token = cookies.get('token');
 	if (!token) {
 		return redirect(302, '/login');
@@ -14,11 +14,12 @@ export const load: PageServerLoad = async ({ locals, params, cookies }) => {
 		return redirect(302, '/login');
 	}
 	const list = await response.json();
-	console.log({ list });
+	const userResponse = await getUser(token)
+	const userInfo = await userResponse.json()
 	return {
 		list,
 		items,
-		isOwner: locals.user.username === list.owner
+		isOwner: userInfo.username == list.owner
 	};
 };
 

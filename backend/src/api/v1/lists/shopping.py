@@ -20,17 +20,15 @@ async def get_shopping_lists(
     session: DBSession,
     user: CurrentUser,
 ) -> dict[str, list[ExistingShoppingList]]:
-    collaborator_lists = (
+    collaborator_stmt = (
         select(ShoppingList)
         .join(Collaborator, Collaborator.list_id == ShoppingList.id)
         .filter(Collaborator.user_id == user.id)
     )
-    collaborator_cursor = await session.execute(collaborator_lists)
-    collaborator_results = collaborator_cursor.scalars()
+    collaborator_cursor = await session.execute(collaborator_stmt)
 
-    owned_lists = select(ShoppingList).join(User).where(User.username == user.username)
-    owned_cursor = await session.execute(owned_lists)
-    owned_results = owned_cursor.scalars()
+    owned_stmt = select(ShoppingList).join(User).where(User.username == user.username)
+    owned_cursor = await session.execute(owned_stmt)
     return {
         "lists": [
             ExistingShoppingList(
@@ -39,7 +37,7 @@ async def get_shopping_lists(
                 owner=user.username,
                 last_updated=shopping_list.updated_at,
             )
-            for shopping_list in owned_results
+            for shopping_list in owned_cursor.scalars()
         ],
         "shared_lists": [
             ExistingShoppingList(
@@ -48,7 +46,7 @@ async def get_shopping_lists(
                 owner=shopping_list.owner.username,
                 last_updated=shopping_list.updated_at,
             )
-            for shopping_list in collaborator_results
+            for shopping_list in collaborator_cursor.scalars()
         ],
     }
 
@@ -59,7 +57,9 @@ async def get_shopping_list(
     user: CurrentUser,
     session: DBSession,
 ) -> ExistingShoppingList:
-    shopping_list = (await querying.get_shopping_list(session, sl_id, user.id)).scalar()
+    shopping_list = (
+        await querying.get_shopping_list(session, sl_id, user.id)
+    ).scalar_one()
     return ExistingShoppingList(
         id=shopping_list.id,
         name=shopping_list.name,
