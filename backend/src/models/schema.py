@@ -36,8 +36,8 @@ class Collaborator(SLBase):
     __tablename__ = "collaborator"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    list_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
+    list_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"), index=True)
 
     list: Mapped["ShoppingList"] = relationship(back_populates="collaborators")
 
@@ -46,7 +46,7 @@ class ShoppingList(SLBase):
     __tablename__ = "shopping_list"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
     name: Mapped[str] = mapped_column(String(256))
 
     owner: Mapped["User"] = relationship(back_populates="lists", lazy="joined")
@@ -58,7 +58,7 @@ class Item(SLBase):
     __tablename__ = "item"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    sl_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"))
+    sl_id: Mapped[int] = mapped_column(ForeignKey("shopping_list.id"), index=True)
 
     name: Mapped[str]
     description: Mapped[str]
