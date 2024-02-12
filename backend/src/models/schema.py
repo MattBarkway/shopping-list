@@ -24,7 +24,7 @@ class User(SLBase):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    username: Mapped[str] = mapped_column(String(256), unique=True)
+    username: Mapped[str] = mapped_column(String(256), unique=True, index=True)
     pw_hash: Mapped[str] = mapped_column(String(256))
     salt: Mapped[str] = mapped_column(String(256))
     verified: Mapped[bool] = mapped_column(default=False)

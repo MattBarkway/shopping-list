@@ -6,11 +6,10 @@ from src.api.payloads import (
     ExistingShoppingList,
     UpdateShoppingList,
 )
-from src.api.utils import DBSession, CurrentUser
-from src.models.schema import ShoppingList, User, Collaborator
-from starlette import status
-
+from src.api.utils import CurrentUser, DBSession
+from src.models.schema import Collaborator, ShoppingList, User
 from src.querying import querying
+from starlette import status
 
 router = APIRouter()
 
@@ -27,7 +26,7 @@ async def get_shopping_lists(
     )
     collaborator_cursor = await session.execute(collaborator_stmt)
 
-    owned_stmt = select(ShoppingList).join(User).where(User.username == user.username)
+    owned_stmt = select(ShoppingList).join(User).where(User.id == user.id)
     owned_cursor = await session.execute(owned_stmt)
     return {
         "lists": [
